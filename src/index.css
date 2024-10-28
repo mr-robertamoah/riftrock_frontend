@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-900;
+  }
+}
+
+@layer components {
+  .hover-underline {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 
+           after:bg-yellow-500 after:transition-all after:duration-300 
+           hover:after:w-full;
+  }
+}
