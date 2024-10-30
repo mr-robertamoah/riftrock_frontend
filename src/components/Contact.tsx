@@ -17,7 +17,7 @@ const contactInfo = [
   {
     icon: Mail,
     title: 'Email Us',
-    details: ['info@terraminesolutions.com', 'support@terraminesolutions.com']
+    details: ['info@riftrockminingservices.com', 'support@riftrockminingservices.com']
   },
   {
     icon: Clock,

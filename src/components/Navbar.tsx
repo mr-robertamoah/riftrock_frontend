@@ -16,7 +16,7 @@ export const Navbar = () => {
             transition={{ duration: 0.5 }}
           >
             <Pickaxe className="h-8 w-8 text-yellow-500" />
-            <span className="text-white font-bold text-xl">TerraMine Solutions</span>
+            <span className="text-white font-bold text-xl">RiftRock Mining Services</span>
           </motion.div>
           
           <div className="hidden md:block">

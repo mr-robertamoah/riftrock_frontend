@@ -31,7 +31,7 @@ export const About = () => {
               <span className="text-yellow-500"> Sustainable Mining</span>
             </h2>
             <p className="text-gray-400 mb-6">
-              Since our establishment, TerraMine Solutions has been at the forefront of 
+              Since our establishment, RiftRock Mining Services has been at the forefront of 
               innovative mining practices. We combine decades of expertise with cutting-edge 
               technology to deliver exceptional results while maintaining our commitment to 
               environmental stewardship.
