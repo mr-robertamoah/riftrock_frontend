@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
+import { useDarkMode } from '../composables/useDarkMode';
 
-export const Hero = () => {
+export const Hero = ({ dark = false } : { dark: boolean }) => {
+
+  const {isDarkMode, setIsDarkMode} = useDarkMode({ dark });
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   return (
-    <div className="relative h-screen flex items-center justify-center overflow-hidden">
+    <div className={`relative h-screen flex items-center justify-center overflow-hidden dark:bg-black bg-white`}>
       <div 
         className="absolute inset-0 z-0"
         style={{
@@ -60,6 +69,13 @@ export const Hero = () => {
       >
         <ChevronDown className="w-8 h-8 text-white" />
       </motion.div>
+
+      <ThemeToggle 
+        onToggle={toggleTheme} 
+        isDarkMode={isDarkMode}
+        className="absolute top-16 right-16 mt-2"
+      >
+      </ThemeToggle>
     </div>
   );
 };
