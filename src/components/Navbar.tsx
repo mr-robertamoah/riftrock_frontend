@@ -6,7 +6,7 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <nav className="fixed w-full bg-slate-900/95 backdrop-blur-sm z-50">
+    <nav className="fixed w-full dark:bg-slate-900/95 bg-yellow-800 backdrop-blur-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <motion.div 
@@ -15,7 +15,7 @@ export const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Pickaxe className="h-8 w-8 text-yellow-500" />
+            <Pickaxe className="h-8 w-8 dark:text-yellow-500 text-yellow-300" />
             <span className="text-white font-bold text-xl">RiftRock Mining Services</span>
           </motion.div>
           

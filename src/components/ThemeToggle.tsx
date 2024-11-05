@@ -6,9 +6,15 @@ interface ThemeToggleProps {
   isDarkMode: boolean;
   onToggle: () => void;
   className: string;
+  title: string;
 }
 
-export const ThemeToggle = ({ isDarkMode, onToggle, className = "" }: ThemeToggleProps) => {
+export const ThemeToggle = ({ 
+  isDarkMode, 
+  onToggle, 
+  className = "",
+  title = "" ,
+}: ThemeToggleProps) => {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -23,12 +29,13 @@ export const ThemeToggle = ({ isDarkMode, onToggle, className = "" }: ThemeToggl
 
   return (
     <motion.button
+      title={title}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleToggle}
       className={`${className} p-3 rounded-full transition-colors duration-300
-        dark:bg-gray-800 dark:text-yellow-500 bg-white text-gray-800
-        border-2 dark:border-yellow-500 border-gray-300`}
+        bg-gray-800 text-yellow-500 dark:bg-white dark:text-gray-800
+        border-2 border-yellow-500 dark:border-gray-300`}
       aria-label="Toggle theme"
     >
       {isDarkMode ? (

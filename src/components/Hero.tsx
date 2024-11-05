@@ -22,22 +22,22 @@ export const Hero = ({ dark = false } : { dark: boolean }) => {
           backgroundPosition: 'center'
         }}
       >
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 dark:bg-black/60 bg-white" />
       </div>
       
       <div className="relative z-10 text-center px-4">
         <motion.h1 
-          className="text-5xl md:text-7xl font-bold text-white mb-6"
+          className="text-5xl md:text-7xl font-bold dark:text-white text-black  mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
           Pioneering the Future
-          <span className="block text-yellow-500">of Mining</span>
+          <span className="block text-yellow-800 dark:text-yellow-500">of Mining</span>
         </motion.h1>
         
         <motion.p 
-          className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto"
+          className="text-xl dark:text-gray-300 text-gray-600 mb-8 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -46,8 +46,8 @@ export const Hero = ({ dark = false } : { dark: boolean }) => {
         </motion.p>
         
         <motion.button 
-          className="bg-yellow-500 text-slate-900 px-8 py-3 rounded-full font-semibold
-                     hover:bg-yellow-400 transition-colors duration-300 transform hover:scale-105"
+          className="dark:bg-yellow-500 bg-yellow-800 text-slate-300 dark:text-slate-900 px-8 py-3 rounded-full font-semibold
+                     hover:bg-yellow-600 dark:hover:bg-yellow-400 transition-colors duration-300 transform hover:scale-105"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
@@ -67,12 +67,13 @@ export const Hero = ({ dark = false } : { dark: boolean }) => {
           repeatType: "reverse"
         }}
       >
-        <ChevronDown className="w-8 h-8 text-white" />
+        <ChevronDown className="w-8 h-8 dark:text-white text-black" />
       </motion.div>
 
       <ThemeToggle 
         onToggle={toggleTheme} 
         isDarkMode={isDarkMode}
+        title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         className="absolute top-16 right-16 mt-2"
       >
       </ThemeToggle>
