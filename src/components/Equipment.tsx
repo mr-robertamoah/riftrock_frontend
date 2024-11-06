@@ -37,7 +37,7 @@ export const Equipment = () => {
   });
 
   return (
-    <section id="equipment" className="py-20 bg-slate-900">
+    <section id="equipment" className="py-20 dark:bg-slate-900 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           ref={ref}
@@ -46,8 +46,8 @@ export const Equipment = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-white mb-4">Our Equipment</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-4">Our Equipment</h2>
+          <p className="dark:text-gray-400 text-gray-700 max-w-2xl mx-auto">
             State-of-the-art machinery and technology for optimal mining operations
           </p>
         </motion.div>
@@ -59,7 +59,7 @@ export const Equipment = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="bg-slate-800 rounded-lg overflow-hidden group hover:bg-slate-700 transition-all duration-300"
+              className="dark:bg-slate-800 bg-slate-600 rounded-lg overflow-hidden group dark:hover:bg-slate-700 hover:bg-slate-500 transition-all duration-300"
             >
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -69,8 +69,8 @@ export const Equipment = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-                  <div className="p-2 bg-yellow-500 rounded-lg">
-                    <item.icon className="w-5 h-5 text-slate-900" />
+                  <div className="p-2 dark:bg-yellow-500 bg-yellow-700 rounded-lg">
+                    <item.icon className="w-5 h-5 dark:text-slate-900 text-slate-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-white">{item.name}</h3>
                 </div>
@@ -78,8 +78,8 @@ export const Equipment = () => {
               <div className="p-4">
                 <ul className="space-y-2">
                   {item.specs.map((spec, i) => (
-                    <li key={i} className="text-gray-400 flex items-center">
-                      <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
+                    <li key={i} className="dark:text-gray-400 text-gray-300 flex items-center">
+                      <span className="w-2 h-2 dark:bg-yellow-500 bg-yellow-700 rounded-full mr-2" />
                       {spec}
                     </li>
                   ))}

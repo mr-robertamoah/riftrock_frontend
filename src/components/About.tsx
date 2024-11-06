@@ -17,7 +17,7 @@ export const About = () => {
   });
 
   return (
-    <section id="about" className="py-20 bg-slate-800">
+    <section id="about" className="py-20 dark:bg-slate-800 bg-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div
@@ -26,17 +26,17 @@ export const About = () => {
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl font-bold text-white mb-6">
+            <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-6">
               Leading the Future of
-              <span className="text-yellow-500"> Sustainable Mining</span>
+              <span className="dark:text-yellow-500 text-yellow-800"> Sustainable Mining</span>
             </h2>
-            <p className="text-gray-400 mb-6">
+            <p className="dark:text-gray-400 text-gray-700 mb-6">
               Since our establishment, RiftRock Mining Services has been at the forefront of 
               innovative mining practices. We combine decades of expertise with cutting-edge 
               technology to deliver exceptional results while maintaining our commitment to 
               environmental stewardship.
             </p>
-            <p className="text-gray-400 mb-8">
+            <p className="dark:text-gray-400 text-gray-700 mb-8">
               Our team of industry experts and dedicated professionals works tirelessly to 
               ensure that every project meets the highest standards of safety, efficiency, 
               and sustainability.
@@ -50,11 +50,11 @@ export const About = () => {
                   transition={{ duration: 0.8, delay: index * 0.2 }}
                   className="text-center"
                 >
-                  <div className="inline-flex p-3 bg-yellow-500 rounded-lg mb-3">
+                  <div className="inline-flex p-3 dark:bg-yellow-500 bg-yellow-700 rounded-lg mb-3">
                     <stat.icon className="w-6 h-6 text-slate-900" />
                   </div>
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
+                  <div className="text-2xl font-bold dark:text-white text-gray-400">{stat.value}</div>
+                  <div className="text-sm dark:text-gray-400 text-gray-700">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -66,14 +66,14 @@ export const About = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
-            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+            <div className="aspect-w-12 aspect-h-6 rounded-lg overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1579547944212-c4f4961a8dd8?auto=format&fit=crop&q=80"
                 alt="Mining operations"
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
-            <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-yellow-500 rounded-lg -z-10" />
+            <div className="absolute -bottom-6 -right-6 w-48 h-48 dark:bg-yellow-500 bg-yellow-700 rounded-lg -z-10" />
           </motion.div>
         </div>
       </div>

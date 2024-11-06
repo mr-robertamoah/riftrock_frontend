@@ -41,7 +41,7 @@ export const Projects = () => {
   });
 
   return (
-    <section id="projects" className="py-20 bg-slate-800">
+    <section id="projects" className="py-20 dark:bg-slate-800 bg-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           ref={ref}
@@ -50,8 +50,8 @@ export const Projects = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-white mb-4">Featured Projects</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-4">Featured Projects</h2>
+          <p className="dark:text-gray-400 text-gray-700 max-w-2xl mx-auto">
             Discover our global portfolio of innovative mining operations
           </p>
         </motion.div>
@@ -63,7 +63,7 @@ export const Projects = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="group relative overflow-hidden rounded-xl bg-slate-900"
+              className="group relative overflow-hidden rounded-xl dark:bg-slate-900 bg-slate-600"
             >
               <div className="aspect-w-16 aspect-h-9 relative">
                 <img
@@ -75,11 +75,11 @@ export const Projects = () => {
               </div>
               <div className="absolute bottom-0 p-6 w-full">
                 <div className="flex items-center space-x-2 mb-2">
-                  <project.icon className="w-5 h-5 text-yellow-500" />
-                  <span className="text-yellow-500 text-sm">{project.location}</span>
+                  <project.icon className="w-5 h-5 dark:text-yellow-500 text-yellow-600 font-bold" />
+                  <span className="dark:text-yellow-500 text-yellow-600 font-bold text-sm">{project.location}</span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
-                <p className="text-gray-400">{project.description}</p>
+                <p className="dark:text-gray-300 text-gray-400">{project.description}</p>
               </div>
             </motion.div>
           ))}

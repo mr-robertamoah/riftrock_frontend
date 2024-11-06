@@ -9,7 +9,7 @@ import { Equipment } from './components/Equipment';
 
 function App() {
 
-  const  [isDarkMode, setIsDarkMode] = useState(false);
+  const  [_, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

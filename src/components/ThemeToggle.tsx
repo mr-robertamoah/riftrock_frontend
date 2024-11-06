@@ -35,7 +35,7 @@ export const ThemeToggle = ({
       onClick={handleToggle}
       className={`${className} p-3 rounded-full transition-colors duration-300
         bg-gray-800 text-yellow-500 dark:bg-white dark:text-gray-800
-        border-2 border-yellow-500 dark:border-gray-300`}
+        border-2 dark:border-yellow-500 border-yellow-800`}
       aria-label="Toggle theme"
     >
       {isDarkMode ? (

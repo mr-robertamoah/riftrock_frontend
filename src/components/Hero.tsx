@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
@@ -46,7 +46,7 @@ export const Hero = ({ dark = false } : { dark: boolean }) => {
         </motion.p>
         
         <motion.button 
-          className="dark:bg-yellow-500 bg-yellow-800 text-slate-300 dark:text-slate-900 px-8 py-3 rounded-full font-semibold
+          className="dark:bg-yellow-500 bg-yellow-700 text-slate-300 dark:text-slate-900 px-8 py-3 rounded-full font-semibold
                      hover:bg-yellow-600 dark:hover:bg-yellow-400 transition-colors duration-300 transform hover:scale-105"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

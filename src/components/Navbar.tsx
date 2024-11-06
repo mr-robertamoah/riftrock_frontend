@@ -21,7 +21,7 @@ export const Navbar = () => {
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              {['Services', 'Projects', 'Equipment', 'About', 'Contact'].map((item, i) => (
+              {['About', 'Equipment', 'Projects', 'Services', 'Contact'].map((item, i) => (
                 <motion.a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -55,7 +55,7 @@ export const Navbar = () => {
         transition={{ duration: 0.3 }}
       >
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          {['Services', 'Projects', 'Equipment', 'About', 'Contact'].map((item) => (
+          {['About', 'Equipment', 'Projects', 'Services', 'Contact'].map((item) => (
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
