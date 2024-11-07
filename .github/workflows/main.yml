@@ -1,0 +1,28 @@
+name: Automaticaaly deploy to EC2
+
+on:
+  push:
+    branches: main
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Continuously delivery with Run Command
+        run: |
+          aws ssm send-command \
+            --instance-ids ${{ secrets.AWS_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["sudo -u ubuntu /bin/bash -c \"cd /var/www/riftrock_frontend && git stash && git pull origin main && npm install && npm run build \"",]' \
+            --comment "Deploying changes to RiftRock"
