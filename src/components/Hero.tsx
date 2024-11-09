@@ -32,8 +32,8 @@ export const Hero = ({ dark = false } : { dark: boolean }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          Pioneering the Future
-          <span className="block text-yellow-800 dark:text-yellow-500">of Mining</span>
+          Pioneering the Future of
+          <span className="block text-yellow-800 dark:text-yellow-500">Mining Services</span>
         </motion.h1>
         
         <motion.p 

@@ -1,28 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Drill, Truck, HardHat, Factory } from 'lucide-react';
+import { HardHat, Truck, Bus, Wrench } from 'lucide-react';
 
 const services = [
   {
-    icon: Drill,
-    title: 'Exploration & Drilling',
-    description: 'State-of-the-art exploration techniques and drilling services for optimal resource discovery.'
+    icon: HardHat,
+    title: 'General Mining Consumables',
+    description: 'Equip your team with essential mining consumables including PPE, hand tools, first aid kits, water, and more for enhanced safety and efficiency.',
   },
   {
     icon: Truck,
-    title: 'Mining Operations',
-    description: 'Efficient and sustainable mining operations with advanced equipment and expert teams.'
+    title: '⁠Civil & Earth works',
+    description: 'At RiftRock Mining Services, we make moving of materials easier and less costly.'
   },
   {
-    icon: HardHat,
-    title: 'Safety Consulting',
-    description: 'Comprehensive safety protocols and consulting services for mining operations.'
+    icon: Wrench,
+    title: 'Mining Ancilliary Services',
+    description: 'Access specialized equipment rentals like HME, graders, and dozers to meet your unique project requirements and ensure operational success.'
   },
   {
-    icon: Factory,
-    title: 'Processing Solutions',
-    description: 'Modern mineral processing solutions utilizing cutting-edge technology.'
+    icon: Bus,
+    title: 'Reliable Human Transportation',
+    description: 'Ensure smooth and efficient transportation for your staff with our reliable services, providing the right buses to meet your logistical needs.'
   }
 ];
 
