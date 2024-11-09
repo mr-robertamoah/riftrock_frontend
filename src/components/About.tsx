@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Award, Users, Globe2, Leaf } from 'lucide-react';
+import RiftRockLogoWithText from './RiftRockLogoWithText';
 
 const stats = [
   { icon: Award, value: '25+', label: 'Years Experience' },
@@ -10,7 +11,7 @@ const stats = [
   { icon: Leaf, value: '100%', label: 'Sustainable' }
 ];
 
-export const About = () => {
+export const About = ({ isDarkMode = false }) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
@@ -19,6 +20,17 @@ export const About = () => {
   return (
     <section id="about" className="py-20 dark:bg-slate-800 bg-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+            initial={{ opacity: 0.5, x: 20 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="relative"
+          >
+          <RiftRockLogoWithText
+            className='w-64 h-64 mx-auto mb-4'
+            isDarkMode={isDarkMode}
+          />
+        </motion.div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div
             ref={ref}

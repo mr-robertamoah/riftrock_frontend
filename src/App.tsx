@@ -28,7 +28,7 @@ function App() {
     <div className="bg-slate-900">
       <Navbar isDarkMode={isDarkMode} />
       <Hero onToggle={toggleTheme} />
-      <About />
+      <About isDarkMode={isDarkMode} />
       <Equipment />
       <Projects />
       <Services />
