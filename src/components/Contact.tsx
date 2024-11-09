@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import RiftRockLogo from './RiftRockLogo';
 
 const contactInfo = [
   {
@@ -26,7 +27,7 @@ const contactInfo = [
   }
 ];
 
-export const Contact = () => {
+export const Contact = ({ isDarkMode = false }) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
@@ -34,6 +35,10 @@ export const Contact = () => {
 
   return (
     <section id="contact" className="py-20 dark:bg-slate-900 bg-slate-200">
+      <RiftRockLogo
+        className='w-20 h-20 md:w-28 mb-4 md:h-28 mx-auto'
+        isDarkMode={!isDarkMode}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           ref={ref}

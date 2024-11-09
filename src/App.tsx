@@ -32,7 +32,7 @@ function App() {
       <Equipment />
       <Projects />
       <Services />
-      <Contact />
+      <Contact isDarkMode={isDarkMode} />
     </div>
   );
 }
