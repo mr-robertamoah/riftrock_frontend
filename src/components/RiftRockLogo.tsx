@@ -1,4 +1,6 @@
 import React from 'react'
+import lightLogo from '../../assets/riftrock logo.svg';
+import darkLogo from '../../assets/riftrock inverted logo.svg';
 
 export default function RiftRockLogo({ isDarkMode = false, className = "" }) {
   return (
@@ -6,8 +8,8 @@ export default function RiftRockLogo({ isDarkMode = false, className = "" }) {
         className={`${className}`}
         src={
         isDarkMode ?
-        "../../assets/riftrock inverted logo.svg" :
-        "../../assets/riftrock logo.svg"
+          darkLogo :
+          lightLogo
         }
         alt="logo" 
     />
