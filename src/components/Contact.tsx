@@ -58,7 +58,7 @@ export const Contact = ({ isDarkMode = false }) => {
             initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
-            className="dark:bg-slate-800 bg-slate-700 p-8 rounded-lg"
+            className="dark:bg-slate-800 bg-slate-700 p-8 rounded-lg h-fit"
           >
             <h3 className="text-2xl font-bold text-white mb-6">Send Us a Message</h3>
             <form className="space-y-6">
@@ -100,7 +100,7 @@ export const Contact = ({ isDarkMode = false }) => {
             initial={{ opacity: 0, x: 20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-6"
           >
             {contactInfo.map((info, index) => (
               <div
