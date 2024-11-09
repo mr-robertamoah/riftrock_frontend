@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Pickaxe, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
-export const Navbar = () => {
+export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
@@ -15,7 +15,14 @@ export const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Pickaxe className="h-8 w-8 dark:text-yellow-500 text-yellow-300" />
+            <img 
+              className='w-10 h-10'
+              src={
+                isDarkMode ?
+                "../../assets/riftrock inverted logo.svg" :
+                "../../assets/riftrock logo.svg"
+              }
+              alt="logo" />
             <span className="text-white font-bold text-xl">RiftRock Mining Services</span>
           </motion.div>
           

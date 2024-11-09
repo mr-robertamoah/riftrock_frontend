@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="147.82269mm"
+   height="182.08624mm"
+   viewBox="0 0 147.82269 182.08624"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:export-bgcolor="#ffffff00" /><defs
+     id="defs1"><style
+       id="style1">
+      .cls-1 {
+        fill: #f2c12e;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #bf7f30;
+      }
+
+      .cls-3 {
+        fill: #224459;
+      }
+    </style></defs><g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(95.924578,-57.611765)"><g
+       id="g1"
+       transform="matrix(0.26458333,0,0,0.26458333,-95.924581,57.611767)"
+       inkscape:label="g1"><g
+         id="g2"
+         inkscape:export-filename="riftrock inverted logo.svg"
+         inkscape:export-xdpi="96"
+         inkscape:export-ydpi="96"><polygon
+           class="cls-1"
+           points="140.7,66.7 338.1,66.7 412.2,149.8 412.2,296.7 313.3,380.3 507.2,621.4 558.7,579 406.1,389.3 478.9,327.6 478.9,124.3 368.1,0 110.8,0 0,124.3 0,528 66.7,528 66.7,149.8 "
+           id="polygon1"
+           style="fill:#f2c12e;fill-opacity:1" /><path
+           class="cls-2"
+           d="m 99.4,528.1 57.5,0.3 V 188.7 c 0,0 23,-25.8 23,-25.8 h 119.4 c 0,0 25.1,26.8 25.1,26.8 v 62.9 c 0,0 -78,64.4 -78,64.4 -36,29.8 -41.5,82.9 -12.3,119.4 L 435.9,688.2 478.4,653.3 276.9,401.9 c -10.3,-12.9 -8.4,-31.7 4.3,-42.3 l 98.2,-81.1 V 168 c 0,0 -56.2,-60.1 -56.2,-60.1 H 155.3 c 0,0 -53.2,59.7 -53.2,59.7 l -2.6,360.5 z"
+           id="path1"
+           style="fill:#bf7f30;fill-opacity:1" /><path
+           class="cls-1"
+           d="m 210.6,202.8 -11.4,12.7 v 68.1 c 0,11.7 13.5,18.2 22.7,11 l 60.2,-47.5 V 216 c 0,0 -12.4,-13.3 -12.4,-13.3 h -59.1 z"
+           id="path2"
+           style="fill:#f2c12e;fill-opacity:1" /></g></g></g></svg>

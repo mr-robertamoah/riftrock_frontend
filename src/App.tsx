@@ -9,7 +9,7 @@ import { Equipment } from './components/Equipment';
 
 function App() {
 
-  const  [_, setIsDarkMode] = useState(false);
+  const  [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -19,10 +19,15 @@ function App() {
 
     setIsDarkMode(false)
   }, [])
+
+  function toggleTheme(theme: boolean) {
+    setIsDarkMode(theme)
+  }
+
   return (
     <div className="bg-slate-900">
-      <Navbar />
-      <Hero />
+      <Navbar isDarkMode={isDarkMode} />
+      <Hero onToggle={toggleTheme} />
       <About />
       <Equipment />
       <Projects />

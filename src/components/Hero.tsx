@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useDarkMode } from '../composables/useDarkMode';
 
-export const Hero = ({ dark = false } : { dark: boolean }) => {
+export const Hero = (
+  { dark = false, onToggle = (theme: boolean) => null } : 
+  { dark: boolean, onToggle: (theme: boolean) => void }) => {
 
   const {isDarkMode, setIsDarkMode} = useDarkMode({ dark });
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
+
+  useEffect(() => {
+    onToggle(isDarkMode)
+  }, [isDarkMode])
 
   return (
     <div className={`relative h-screen flex items-center justify-center overflow-hidden dark:bg-black bg-white`}>
