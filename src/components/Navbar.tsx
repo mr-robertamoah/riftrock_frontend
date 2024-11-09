@@ -23,8 +23,8 @@ export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
             <span className="text-white font-bold text-xl">RiftRock Mining Services</span>
           </motion.div>
           
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+          <div className="ml-10 hidden md:block w-fit overflow-hidden overflow-x-auto">
+            <div className="flex w-fit items-baseline justify-end space-x-4">
               {['About', 'Equipment', 'Projects', 'Services', 'Contact'].map((item, i) => (
                 <motion.a
                   key={item}
