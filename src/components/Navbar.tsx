@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import RiftRockLogo from './RiftRockLogo';
 
 export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -15,14 +16,10 @@ export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <img 
+            <RiftRockLogo 
               className='w-10 h-10'
-              src={
-                isDarkMode ?
-                "../../assets/riftrock inverted logo.svg" :
-                "../../assets/riftrock logo.svg"
-              }
-              alt="logo" />
+              isDarkMode={isDarkMode}
+            />
             <span className="text-white font-bold text-xl">RiftRock Mining Services</span>
           </motion.div>
           
