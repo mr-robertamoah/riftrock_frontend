@@ -5,10 +5,10 @@ import { Award, Users, Globe2, Leaf } from 'lucide-react';
 import RiftRockLogoWithText from './RiftRockLogoWithText';
 
 const stats = [
-  { icon: Award, value: '25+', label: 'Years Experience' },
-  { icon: Users, value: '1000+', label: 'Team Members' },
-  { icon: Globe2, value: '15', label: 'Countries' },
-  { icon: Leaf, value: '100%', label: 'Sustainable' }
+  { icon: Award, value: '25+', label: 'Extensive aggregation of Years of Experience' },
+  // { icon: Users, value: '1000+', label: 'Team Members' },
+  // { icon: Globe2, value: '15', label: 'Countries' },
+  { icon: Leaf, value: '100%', label: 'Sustainable and Efficient outputs' }
 ];
 
 export const About = ({ isDarkMode = false }) => {
@@ -39,21 +39,14 @@ export const About = ({ isDarkMode = false }) => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-6">
-              Leading the Future of
-              <span className="dark:text-yellow-500 text-yellow-800"> Sustainable Mining</span>
+              <span className="dark:text-yellow-500 text-yellow-800">Empowering Mining Excellence </span>
+              through Reliable Services
             </h2>
-            <p className="dark:text-gray-400 text-gray-700 mb-6">
-              Since our establishment, RiftRock Mining Services has been at the forefront of 
-              innovative mining practices. We combine decades of expertise with cutting-edge 
-              technology to deliver exceptional results while maintaining our commitment to 
-              environmental stewardship.
+            <p className="dark:text-gray-400 text-gray-700 my-8">
+            RiftRock is a leading provider of comprehensive mining services, dedicated to delivering exceptional support to the mining industry. Our expertise spans general consumables, transportation, and rental equipment, ensuring seamless operations for our clients.
             </p>
-            <p className="dark:text-gray-400 text-gray-700 mb-8">
-              Our team of industry experts and dedicated professionals works tirelessly to 
-              ensure that every project meets the highest standards of safety, efficiency, 
-              and sustainability.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            
+            <div className="grid grid-cols-2 gap-6">
               {stats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
@@ -70,6 +63,22 @@ export const About = ({ isDarkMode = false }) => {
                 </motion.div>
               ))}
             </div>
+
+            <div className='relative z-10 w-fit mt-20'>
+              <div className='absolute -top-4 -bottom-4 -left-2 p-2 rounded-l-md w-[50%] -z-10 rotate-12 dark:bg-yellow-500 bg-yellow-700'></div>
+              <h3 className="text-2xl font-bold dark:text-white text-black/80 mb-4 z-50">Our Mission</h3>
+            </div>
+            <p className="dark:text-gray-400 text-gray-700 my-8">
+              To provide top-notch mining services, fostering long-term partnerships with our clients, while prioritizing safety, efficiency, and sustainability.
+            </p>
+
+            <div className='relative z-10 w-fit mt-16'>
+              <div className='absolute -top-4 -bottom-4 -left-2 p-2 rounded-l-md w-[50%] -z-10 rotate-12 dark:bg-yellow-500 bg-yellow-700'></div>
+              <h3 className="text-2xl font-bold dark:text-white text-black/80 mb-4 z-50">Our Vision</h3>
+            </div>
+            <p className="dark:text-gray-400 text-gray-700 my-8">
+              To become the preferred mining services partner in [Region/Industry], recognized for our commitment to excellence, innovation, and customer satisfaction.
+            </p>
           </motion.div>
           
           <motion.div

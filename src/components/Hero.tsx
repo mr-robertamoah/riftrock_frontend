@@ -38,8 +38,8 @@ export const Hero = (
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          Pioneering the Future of
-          <span className="block text-yellow-800 dark:text-yellow-500">Mining Services</span>
+          <span className="block text-yellow-800 dark:text-yellow-500">Empowering Mining Excellence</span>
+          through Reliable Services
         </motion.h1>
         
         <motion.p 
