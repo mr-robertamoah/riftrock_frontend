@@ -5,7 +5,7 @@ import { Award, Users, Globe2, Leaf } from 'lucide-react';
 import RiftRockLogoWithText from './RiftRockLogoWithText';
 
 const stats = [
-  { icon: Award, value: '25+', label: 'Extensive aggregation of Years of Experience' },
+  // { icon: Award, value: '25+', label: 'Extensive aggregation of Years of Experience' },
   // { icon: Users, value: '1000+', label: 'Team Members' },
   // { icon: Globe2, value: '15', label: 'Countries' },
   { icon: Leaf, value: '100%', label: 'Sustainable and Efficient outputs' }
