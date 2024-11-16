@@ -3,22 +3,29 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import RiftRockLogo from './RiftRockLogo';
+import { div, p } from 'framer-motion/client';
 
 const contactInfo = [
   {
     icon: MapPin,
     title: 'Visit Us',
-    details: ['123 Mining Avenue', 'Resource City, RC 12345', 'United States']
+    details: [
+      {type: 'House #', value: 'Plot 67 & 69'},
+      {type: 'Street Name', value: 'Kofi Yeboah Rd'},
+      {type: 'Postal Address', value: 'BS0318'},
+      {type: 'Suburb', value: 'Watchman'},
+      {type: 'City', value: 'Sunyani'},
+    ]
   },
   {
     icon: Phone,
     title: 'Call Us',
-    details: ['+1 (555) 123-4567', '+1 (555) 765-4321']
+    details: ['+233 209 249 556']
   },
   {
     icon: Mail,
     title: 'Email Us',
-    details: ['info@riftrockminingservices.com', 'support@riftrockminingservices.com']
+    details: ['info@riftrock.org', 'support@riftrock.org']
   },
   {
     icon: Clock,
@@ -110,10 +117,18 @@ export const Contact = ({ isDarkMode = false }) => {
                 <div className="w-12 mx-auto h-12 dark:bg-yellow-500 bg-yellow-800 rounded-lg flex items-center justify-center mb-4">
                   <info.icon className="w-6 h-6 dark:text-slate-900 text-slate-400" />
                 </div>
-                <h4 className="text-lg font-semibold text-white mb-2">{info.title}</h4>
-                {info.details.map((detail, i) => (
-                  <p key={i} className="text-gray-300 text-ellipsis w-full dark:text-gray-400">{detail}</p>
-                ))}
+                <h4 className="text-lg text-center font-semibold text-white mb-2">{info.title}</h4>
+                {info.details.map((detail, i) => {
+                  if (typeof detail == "string")
+                    return <p key={i} className="text-gray-300 text-ellipsis w-full dark:text-gray-400">{detail}</p>
+
+                  return (
+                    <div key={i} className='mb-3'>
+                      <p className="text-gray-200 text-xs text-ellipsis ml-10 w-full dark:text-gray-300">{detail.type}</p>
+                      <p className="text-gray-300 text-ellipsis w-full dark:text-gray-400">{detail.value}</p>
+                    </div>
+                  )
+                })}
               </div>
             ))}
           </motion.div>
