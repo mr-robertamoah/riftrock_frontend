@@ -1,39 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
-import { About } from './components/About';
-import { Services } from './components/Services';
-import { Contact } from './components/Contact';
-import { Projects } from './components/Projects';
-import { Equipment } from './components/Equipment';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import Home from './components/Home';
 
 function App() {
 
-  const  [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsDarkMode(localStorage.getItem('theme') === 'dark')
-      return
-    }
-
-    setIsDarkMode(false)
-  }, [])
-
-  function toggleTheme(theme: boolean) {
-    setIsDarkMode(theme)
-  }
-
   return (
-    <div className="bg-slate-900">
-      <Navbar isDarkMode={isDarkMode} />
-      <Hero onToggle={toggleTheme} />
-      <About isDarkMode={isDarkMode} />
-      <Equipment />
-      <Projects />
-      <Services />
-      <Contact isDarkMode={isDarkMode} />
-    </div>
+    <Router>
+      <Routes>
+        <Route path='/' element={<Home />} />
+
+      </Routes>
+    </Router>
   );
 }
 
