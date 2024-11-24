@@ -3,14 +3,38 @@ import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import RiftRockLogo from './RiftRockLogo';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeUser } from '../redux/slices/auth';
 
 export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate()
+  const user = useSelector((state) => state.auth.value);
+  const dispatch = useDispatch()
 
   function toggleLogin() {
     setShowLogin(!showLogin)
+  }
+
+  async function logout() {
+    axios.post('/auth/logout', {}, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+    })
+    .then(res => {
+        console.log(res);
+        localStorage.removeItem('access_token')
+        dispatch(removeUser())
+    })
+    .catch(error => {
+        console.log(error);
+        if (error.response.status == 401) {
+          localStorage.removeItem('access_token')
+          dispatch(removeUser())
+        }
+    })
   }
 
   function goToLogin() {
@@ -21,7 +45,7 @@ export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
     <nav className="fixed w-full dark:bg-slate-900/95 bg-yellow-800 backdrop-blur-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {
-          showLogin && (
+          (showLogin && !user) && (
             <div
               className='absolute top-14 left-3 w-56
                 dark:bg-white bg-slate-700 h-24 rounded flex justify-center items-center'
@@ -38,6 +62,28 @@ export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
                     dark:text-slate-900 py-1 px-4 rounded border-b-2 border-yellow-700'
                   onClick={goToLogin}
                 >login</div>
+              </div>
+            </div>
+          )
+        }
+        {
+          (showLogin && user) && (
+            <div
+              className='absolute top-14 left-3 w-56
+                dark:bg-white bg-slate-700 h-24 rounded flex justify-center items-center'
+            >
+              <div className='w-full my-3'>
+                <div
+                  className='mb-4 rounded-full bg-white text-slate-700 p-2 w-6 h-6
+                    flex justify-center items-center ml-auto mr-2 cursor-pointer
+                    dark:bg-slate-600 dark:text-slate-300'
+                  onClick={toggleLogin}
+                >X</div>
+                <div
+                  className='dark:bg-slate-300 bg-slate-900 text-white w-fit mx-auto cursor-pointer
+                    dark:text-slate-900 py-1 px-4 rounded border-b-2 border-yellow-700'
+                  onClick={logout}
+                >logout</div>
               </div>
             </div>
           )

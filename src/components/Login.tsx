@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDarkMode } from '../composables/useDarkMode';
 import RiftRockLogo from './RiftRockLogo';
 import { ThemeToggle } from './ThemeToggle';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addUser, removeUser } from '../redux/slices/auth';
 
 function Login() {
 
@@ -9,6 +12,8 @@ function Login() {
   const  [loginData, setLoginData] = useState({ email: '', password: '' });
   const  [alert, setAlert] = useState<string | null>();
   const  [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   function toggleTheme() {
     setIsDarkMode(!isDarkMode)
@@ -40,13 +45,24 @@ function Login() {
     })
     .then((res) => {
       console.log(res);
+      localStorage.setItem('access_token', res.data.access_token);
+      dispatch(addUser(res.data.user))
+      goHome()
     })
     .catch((err) => {
       console.log(err);
+      localStorage.removeItem('access_token');
+      dispatch(removeUser())
+      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
     })
+  }
+
+  function goHome() {
+    console.log('here');
+    navigate('/')
   }
 
   function changeLoginData(key: 'email' | 'password', value: string) {
@@ -63,7 +79,10 @@ function Login() {
         className='w-[90%] sm:w-[80%] md:w-[60%] h-[60vh] dark:bg-slate-400 rounded-md relative
           bg-slate-700'
       >
-        <div className='absolute -top-14 left-0 right-0 flex justify-center'>
+        <div 
+          className='absolute -top-14 left-0 right-0 flex justify-center'
+          onClick={goHome}
+        >
           <RiftRockLogo
             className='w-36 h-36'
             isDarkMode={isDarkMode}
@@ -107,7 +126,7 @@ function Login() {
 
       {
         alert?.length ?
-          <div className='absolute top-3 left-0 right-0 transition-all duration-200'>
+          <div className='absolute top-3 left-0 right-0 transition-all duration-200 z-50'>
             <div 
               className='bg-red-700 text-red-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
                 mx-auto relative transition-all duration-200'
@@ -126,7 +145,7 @@ function Login() {
 
       {
         loading ?
-          <div className='absolute top-3 left-0 right-0 transition-all duration-200'>
+          <div className='absolute top-3 left-0 right-0 transition-all duration-200 z-50'>
             <div 
               className='bg-green-700 text-green-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
                 mx-auto relative transition-all duration-200'
