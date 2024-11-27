@@ -9,6 +9,7 @@ import { Equipment } from './Equipment';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '../redux/slices/auth';
 import { useNavigate } from 'react-router-dom';
+import { useGetUser } from '../composables/useGetUser';
 
 function Home() {
 
@@ -17,6 +18,7 @@ function Home() {
   const user = useSelector((state) => state.auth.value);
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { getUser: getAuthUser } = useGetUser()
 
   useEffect(() => {
     getUser()
@@ -27,6 +29,18 @@ function Home() {
 
     setIsDarkMode(false)
   }, [])
+
+  useEffect(() => {
+    if (user) return
+
+    callable()
+  }, [])
+
+  async function callable() {
+    const u = await getAuthUser(user)
+
+    if (u) dispatch(addUser(u))
+  }
 
   function toggleTheme(theme: boolean) {
     setIsDarkMode(theme)
