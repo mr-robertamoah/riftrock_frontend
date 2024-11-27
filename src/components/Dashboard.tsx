@@ -6,12 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
+import { addServices } from '../redux/slices/dashboard';
 
 export default function Dashboard() {
   const [fullSideBar, setFullSideBar] = useState(false)
   const [activeSection, setActiveSection] = useState('Services')
   const navigator = useNavigate()
   const user = useSelector((state) => state.auth.value)
+  const dashboardData = useSelector((state) => state.dashboard.value)
   const { getUser } = useGetUser()
   const dispatch = useDispatch()
   const sections = [
@@ -25,19 +27,40 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) return
 
-    async function callable() {
-      return await getUser()
-    }
+    callable()
+  }, [])
 
-    const u = callable()
-    
+  async function callable() {
+    const u = await getUser(user)
+
     if (!u) goHome()
 
     dispatch(addUser(u))
-  }, [])
+  }
 
   function goHome() {
     navigator('/')
+  }
+
+  function clickSection(section: string) {
+    setActiveSection(section)
+
+    if (section == 'Services' && !dashboardData.services.length)
+      getServices()
+  }
+
+  async function getServices() {
+    axios.get('/services')
+    .then((res) => {
+      console.log(res);
+      dispatch(addServices(res.data.data))
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+
+    })
   }
 
   return (
@@ -59,7 +82,7 @@ export default function Dashboard() {
           </motion.div>
           <div className='w-full text-center uppercase font-bold'>{activeSection}</div>
 
-          <div className='text-sm text-slate-300'>{user?.email && ''}</div>
+          <div className='text-sm text-slate-300'>{user?.email ?? ''}</div>
         </div>
       </div>
       <div className='flex justify-between'>
@@ -82,18 +105,18 @@ export default function Dashboard() {
 
           <div className='mt-4 flex flex-col justify-end items-center'>
             {
-              sections.map((section) => (
-                <div className={`${section.name == activeSection ? 
+              sections.map((section, idx) => (
+                <div key={idx} className={`${section.name == activeSection ? 
                   'font-bold' : 
                   'text-slate-300 '} 
-                  mt-4 hover:text-slate-100 cursor-pointer grid items-center gap-2 w-full
-                  ${fullSideBar ? ' grid-cols-2 px-4' : ' grid-cols-1 px-auto'}`}
-                  onClick={() => setActiveSection(section.name)}
+                  mt-4 hover:text-slate-100 cursor-pointer items-center gap-2 w-full
+                  `}
+                  onClick={() => clickSection(section.name)}
                 >
                   {
                     (section.name == 'Users' && user?.role == 'USER') ?
                       <></> :
-                      <div>
+                      <div className={`grid ${fullSideBar ? ' grid-cols-2 px-4' : ' grid-cols-1 px-auto'}`}>
                         <div className={`${fullSideBar ? '' : 'mx-auto w-fit'}`}><section.icon /></div>
                         {
                           fullSideBar &&
@@ -108,7 +131,24 @@ export default function Dashboard() {
         </div>
         <div className='w-full'>
           
-          <div className='p-6'>main</div>
+          <div className='p-6 flex justify-start gap-3 items-start flex-wrap'>
+            {
+              dashboardData.services.map((service) => (
+                <div key={service.id} 
+                  className='rounded bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
+                    max-w-[250px]'>
+                  <div></div>
+                  <div>{service.title}</div>
+                  <div>{service.description}</div>
+                  <div>{service.createdAt}</div>
+
+                  <div>
+                    <div>view</div>
+                  </div>
+                </div> 
+              ))
+            }
+          </div>
         </div>
       </div>
     </div>

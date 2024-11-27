@@ -46,6 +46,7 @@ function Login() {
     .then((res) => {
       console.log(res);
       localStorage.setItem('access_token', res.data.access_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`
       dispatch(addUser(res.data.user))
       goHome()
     })
