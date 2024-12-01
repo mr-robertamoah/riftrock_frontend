@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Award, Users, Globe2, Leaf } from 'lucide-react';
 import RiftRockLogoWithText from './RiftRockLogoWithText';
+import { useSelector } from 'react-redux';
 
 const stats = [
   // { icon: Award, value: '25+', label: 'Extensive aggregation of Years of Experience' },
@@ -16,6 +17,18 @@ export const About = ({ isDarkMode = false }) => {
     triggerOnce: true,
     threshold: 0.1
   });
+  const detailsData = useSelector((state) => state.dashboard.value.details)
+  const [tagline, setTagline] = useState(detailsData.find(detail => detail?.key == 'TAGLINE'));
+  const [taglineMessage, setTaglineMessage] = useState(detailsData.find(detail => detail?.key == 'TAGLINE_MESSAGE')?.value?.message ?? null);
+  const [mission, setMission] = useState(detailsData.find(detail => detail?.key == 'MISSION')?.value?.message ?? null);
+  const [vision, setVision] = useState(detailsData.find(detail => detail?.key == 'VISION')?.value?.message ?? null);
+
+  useEffect(() => {
+    setTagline(detailsData.find(detail => detail?.key == 'TAGLINE'))
+    setTaglineMessage(detailsData.find(detail => detail?.key == 'TAGLINE_MESSAGE')?.value?.message ?? null)
+    setMission(detailsData.find(detail => detail?.key == 'MISSION')?.value?.message ?? null)
+    setVision(detailsData.find(detail => detail?.key == 'VISION')?.value?.message ?? null)
+  }, [detailsData])
 
   return (
     <section id="about" className="py-20 dark:bg-slate-800 bg-slate-200">
@@ -39,14 +52,14 @@ export const About = ({ isDarkMode = false }) => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-6">
-              <span className="dark:text-yellow-500 text-yellow-800">Empowering Mining Excellence </span>
-              through Reliable Services
+              <span className="dark:text-yellow-500 text-yellow-800">{tagline?.value?.gold ?? 'Empowering Mining Excellence'} </span>
+              {tagline?.value?.black ?? 'through Reliable Services'}
             </h2>
             <p className="dark:text-gray-400 text-gray-700 my-8">
-            RiftRock is a leading provider of comprehensive mining services, dedicated to delivering exceptional support to the mining industry. Our expertise spans general consumables, transportation, and rental equipment, ensuring seamless operations for our clients.
+            {taglineMessage ?? 'RiftRock is a leading provider of comprehensive mining services, dedicated to delivering exceptional support to the mining industry. Our expertise spans general consumables, transportation, and rental equipment, ensuring seamless operations for our clients.'}
             </p>
             
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {stats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
@@ -69,7 +82,7 @@ export const About = ({ isDarkMode = false }) => {
               <h3 className="text-2xl font-bold dark:text-white text-black/80 mb-4 z-50">Our Mission</h3>
             </div>
             <p className="dark:text-gray-400 text-gray-700 my-8">
-              To provide top-notch mining services, fostering long-term partnerships with our clients, while prioritizing safety, efficiency, and sustainability.
+              {mission ?? 'To provide top-notch mining services, fostering long-term partnerships with our clients, while prioritizing safety, efficiency, and sustainability.'}
             </p>
 
             <div className='relative z-10 w-fit mt-16'>
@@ -77,7 +90,7 @@ export const About = ({ isDarkMode = false }) => {
               <h3 className="text-2xl font-bold dark:text-white text-black/80 mb-4 z-50">Our Vision</h3>
             </div>
             <p className="dark:text-gray-400 text-gray-700 my-8">
-              To become the preferred mining services partner in [Region/Industry], recognized for our commitment to excellence, innovation, and customer satisfaction.
+              {vision ?? 'To become the preferred mining services partner in [Region/Industry], recognized for our commitment to excellence, innovation, and customer satisfaction.'}
             </p>
           </motion.div>
           

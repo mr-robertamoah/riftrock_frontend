@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, deleteUser } from '../redux/slices/dashboard';
+import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, deleteUser, addContacts, deleteContact, updateContact, addDetails, updateDetail } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 
@@ -38,7 +38,7 @@ export default function Dashboard() {
   }
   const  [alert, setAlert] = useState<string | null>();
   const  [loading, setLoading] = useState<boolean>(false);
-  const  [createServiceData, setcreateServiceData] = useState<{
+  const  [createServiceData, setCreateServiceData] = useState<{
     file: File|null, title: string, description: string, id?: number|null,
     details: string, icon: string, fileDescription: string
   }>(emptyCreateServiceData);
@@ -46,12 +46,21 @@ export default function Dashboard() {
     email: string, firstName: string, lastName: string, id?: number|null,
     otherNames: string, password: string, passwordConfirmation: string
   }>(emptyCreateUserData);
+  const  [createContactData, setCreateContactData] = useState<{
+    email: string, name: string, message: string, id?: number
+  } | null>(null);
+  const  [detailData, setDetailData] = useState<{
+    key: string, 
+    info?: string, 
+    value: { message?: string, gold?: string, black?: string, tagline?: string }, 
+    id?: number
+  } | null>(null);
   const [pages, setPages] = useState({
-    'Services': {next: 1, current: 0, previous: 0},
-    'Emails': {next: 1, current: 0, previous: 0},
-    'Contacts': {next: 1, current: 0, previous: 0},
-    'Users': {next: 1, current: 0, previous: 0},
-    'Details': {next: 1, current: 0, previous: 0},
+    'Services': {next: 0, current: 0, previous: 0},
+    'Emails': {next: 0, current: 0, previous: 0},
+    'Contacts': {next: 0, current: 0, previous: 0},
+    'Users': {next: 0, current: 0, previous: 0},
+    'Details': {next: 0, current: 0, previous: 0},
   })
   const sections = [
     {name: 'Users', icon: User},
@@ -112,11 +121,20 @@ export default function Dashboard() {
       getServices()
     }
     
+    if (section == 'Contacts' && !dashboardData.contacts.length) {
+      initiatePageField('Contacts')
+
+      getContacts()
+    }
+    
     if (section == 'Users' && !dashboardData.users.length) {
       initiatePageField('Users')
 
       getUsers()
     }
+    
+    if (section == 'Details' && !dashboardData.details.length)
+      getDetails()
   }
 
   async function getServices() {
@@ -138,6 +156,25 @@ export default function Dashboard() {
     })
   }
 
+  async function getContacts() {
+    if (!pages.Contacts.current)
+      return
+
+    axios.get(`/contacts?page${pages.Contacts.current}`)
+    .then((res) => {
+      console.log(res);
+      setPagesUsingMeta(res.data.meta, 'Contacts')
+
+      dispatch(addContacts(res.data.data))
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+
+    })
+  }
+
   async function getUsers() {
     if (!pages.Users.current)
       return
@@ -148,6 +185,23 @@ export default function Dashboard() {
       setPagesUsingMeta(res.data.meta, 'Users')
 
       dispatch(addUsers(res.data.data))
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+
+    })
+  }
+
+  async function getDetails() {
+    if (dashboardData.details.length) return
+    
+    axios.get(`/details`)
+    .then((res) => {
+      console.log(res);
+
+      dispatch(addDetails(res.data))
     })
     .catch((err) => {
       console.log(err);
@@ -347,19 +401,71 @@ export default function Dashboard() {
     })
   }
 
-  async function deleteUserFromDashboard(event) {
+  async function deleteContactFromDashboard(event) {
     event.preventDefault()
-
-    const otherUser = dashboardData.users.find((u) => u.id == createUserData.id)
+    if (!createContactData) return
 
     setLoading(true)
 
-    axios.delete(`/users/${otherUser.id}`, {
-      ...createUserData
+    axios.delete(`/contacts/${createContactData.id}`)
+    .then((res) => {
+      console.log(res);
+      dispatch(deleteContact(createContactData))
+      setShowModal(null)
+    })
+    .catch((err) => {
+      console.log(err);
+      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function markContactFromDashboard(event) {
+    event.preventDefault()
+    if (!createContactData) return
+
+    setLoading(true)
+
+    axios.patch(`/contacts/${createContactData.id}`)
+    .then((res) => {
+      console.log(res);
+      dispatch(updateContact(res.data))
+      setShowModal(null)
+    })
+    .catch((err) => {
+      console.log(err);
+      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function updateDetailFromDashboard(event) {
+    event.preventDefault()
+
+    if (!detailData) return
+
+    const detail = dashboardData.details.find((u) => u.id == detailData.id)
+    if (
+      (detail.value.message && detail.value.message == detailData.value.message) &&
+      (detail.value.gold && detail.value.gold == detailData.value.gold) &&
+      (detail.value.tagline && detail.value.tagline == detailData.value.tagline) &&
+      (detail.value.black && detail.value.black == detailData.value.black)
+    ) {
+      return showAlert('No new information was provided.')
+    }
+
+    setLoading(true)
+
+    axios.patch(`/details/${detail.id}`, {
+      value: JSON.stringify(detailData.value)
     })
     .then((res) => {
       console.log(res);
-      dispatch(deleteUser(createUserData))
+      dispatch(updateDetail(res.data))
       setShowModal(null)
     })
     .catch((err) => {
@@ -425,11 +531,46 @@ export default function Dashboard() {
     })
   }
 
+  function changeDetailData(key: string, value: string) {
+    clearAlert()
+    if (!detailData) return
+    setDetailData({
+      id: detailData.id,
+      key: detailData.key,
+      info: detailData.info,
+      value: {
+        ...detailData?.value,
+        [key]: value,
+      }
+    })
+  }
+
   function updateCreateUserData(user) {
     const data = {...user}
     delete data.createdAt
     delete data.updatedAt
     setCreateUserData(data)
+  }
+
+  function updateCreateServiceData(service) {
+    const data = {...service}
+    delete data.createdAt
+    delete data.updatedAt
+    setCreateServiceData(data)
+  }
+
+  function updateDetailData(detail) {
+    const data = {...detail}
+    delete data.createdAt
+    delete data.updatedAt
+    setDetailData(data)
+  }
+
+  function updateCreateContactData(contact) {
+    const data = {...contact}
+    delete data.createdAt
+    delete data.updatedAt
+    setCreateContactData(data)
   }
 
   return (
@@ -485,7 +626,9 @@ export default function Dashboard() {
                   {
                     (section.name == 'Users' && user?.role == 'USER') ?
                       <></> :
-                      <div className={`grid ${fullSideBar ? ' grid-cols-2 px-4' : ' grid-cols-1 px-auto'}`}>
+                      <div 
+                        title={fullSideBar ? '' : section.name}
+                        className={`grid ${fullSideBar ? ' grid-cols-2 px-4' : ' grid-cols-1 px-auto'}`}>
                         <div className={`${fullSideBar ? '' : 'mx-auto w-fit'}`}><section.icon /></div>
                         {
                           fullSideBar &&
@@ -501,7 +644,7 @@ export default function Dashboard() {
         <div className={`w-full relative px-2 pt-8 ${dashboardData[activeSection.toLowerCase()].length == 0 ?
           'flex justify-start gap-44 flex-col items-center': ''}`}>
           {
-            !['Contacts', 'Emails'].includes(activeSection) &&
+            !['Contacts', 'Emails', 'Details'].includes(activeSection) &&
               <div className='absolute top-2 right-4 p-2'>
                 <button className='rounded py-1 px-2 bg-teal-700'
                 onClick={createDashboardItem}
@@ -525,17 +668,32 @@ export default function Dashboard() {
                       <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(service.createdAt)}</div>
     
                       <div className='flex items-center justify-end gap-2'>
-                        <div 
-                          className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
-                        >view</div>
+                        {
+                          service.details?.length > 0 &&
+                            <div 
+                              className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                              onClick={() => {
+                                updateCreateServiceData(service)
+                                setShowModal('View_Service')
+                              }}
+                            >view</div>
+                          }
                         <div 
                           className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
                             hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
+                          onClick={() => {
+                            updateCreateServiceData(service)
+                            setShowModal('Edit_Service')
+                          }}
                         >edit</div>
                         <div 
                           className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
                             hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
+                          onClick={() => {
+                            updateCreateServiceData(service)
+                            setShowModal('Delete_Service')
+                          }}
                         >delete</div>
                       </div>
                     </div> 
@@ -545,6 +703,54 @@ export default function Dashboard() {
                 {
                   dashboardData.services.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
                   >No services available</div>
+                }
+              </div>
+            </div>
+          }
+          {/* contacts */}
+          {
+            activeSection == 'Contacts' &&
+            <div>
+              <div
+                className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
+                {
+                  dashboardData.contacts.map((contact) => (
+                    <div key={contact.id} 
+                      className={`rounded h-fit ${contact.seen ? 'bg-green-300' : 'bg-slate-300'} shadow-md shadow-yellow-700 text-slate-700 p-2
+                        `}>
+                      <div></div>
+                      <div className='text-center font-bold'>{contact.name?.length ? contact.name : 'No name'}</div>
+                      <div className='mt-3 mb-2 px-2'>{contact.message}</div>
+                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(contact.createdAt)}</div>
+    
+                      <div className='flex items-center justify-end gap-2'>
+                        {
+                          !contact.seen &&
+                            <div 
+                              className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                              onClick={() => {
+                                updateCreateContactData(contact)
+                                setShowModal('Mark_Contact')
+                              }}
+                            >mark as seen</div>
+                          }
+                        <div 
+                          className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
+                            hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
+                          onClick={() => {
+                            updateCreateContactData(contact)
+                            setShowModal('Delete_Contact')
+                          }}
+                        >delete</div>
+                      </div>
+                    </div> 
+                  ))
+                }
+    
+                {
+                  dashboardData.contacts.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
+                  >No contacts available</div>
                 }
               </div>
             </div>
@@ -598,34 +804,48 @@ export default function Dashboard() {
 
           {/* details */}
           {
-            activeSection == 'details' &&
+            activeSection == 'Details' &&
             <div>
               <div
                 className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
                 {
-                  dashboardData.details.map((details) => (
-                    <div key={details.id} 
-                      className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
-                        '>
-                      <div></div>
-                      <div className='text-center font-bold'>{getUserName(details)}</div>
-                      <div className='mt-3 mb-2 px-2'>{details.email}</div>
-                      <div className='mt-3 mb-2 px-2'>{details.role}</div>
-                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(details.createdAt)}</div>
+                  dashboardData.details.map((detail) => (
+                    <div key={detail.id} 
+                      className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-800 p-2
+                        '
+                    >
+                      <div className='text-center font-bold capitalize'>{detail.key?.toLowerCase()?.replace('_', ' ')}</div>
+                      {
+                        detail.value.tagline?.length > 0 &&
+                          <div className='mt-3 mb-2 px-2'><div className='text-blue-700 text-sm font-bold'>Tagline</div>{detail.value.tagline}</div>
+                      }
+                      {
+                        detail.value.message?.length > 0 &&
+                          <div className='mt-3 mb-2 px-2'>{detail.value.message}</div>
+                      }
+                      {
+                        detail.value.gold?.length > 0 &&
+                          <div className='mt-3 mb-2 px-2'><div className='text-yellow-700 text-sm font-bold'>Gold</div>{detail.value.gold}</div>
+                      }
+                      {
+                        detail.value.black?.length > 0 &&
+                          <div className='mt-3 mb-2 px-2'><div className='text-slate-800 text-sm font-bold'>Black</div>{detail.value.black}</div>
+                      }
+                      {
+                        detail.info?.length > 0 &&
+                          <div className='mt-3 my-4 px-2 text-slate-600'><div className='text-black text-sm font-bold'>Note</div>{detail.info}</div>
+                      }
+                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(detail.updatedAt)}</div>
     
                       <div className='flex items-center justify-end gap-2'>
                         <div 
-                          className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
-                        >view</div>
-                        <div 
                           className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
                             hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
+                          onClick={() => {
+                            updateDetailData(detail)
+                            setShowModal('Edit_Detail')
+                          }}
                         >edit</div>
-                        <div 
-                          className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
-                        >delete</div>
                       </div>
                     </div> 
                   ))
@@ -748,6 +968,97 @@ export default function Dashboard() {
                 </form>
               </div>
           }
+
+          
+          {/* updating details */}
+          {
+            ['Edit_Detail'].includes(showModal) &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Edit Detail Information</div>
+                {
+                  !!detailData?.info?.length &&
+                    <div className='mt-3 my-4 px-2 text-slate-600'><div className='text-black text-sm font-bold'>Note</div>{detailData.info}</div>
+                }
+                <form onSubmit={updateDetailFromDashboard}>
+
+                  <label htmlFor="key"
+                    className='mb-2 font-bold dark:text-slate-800 text-slate-300'
+                  >Key</label>
+                  <input type="text" name="key" id="key" disabled
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={detailData?.key?.toLowerCase().replace('_', ' ') ?? ''}
+                  />
+
+                  {
+                    !!detailData?.value?.tagline?.length &&
+                      <div>
+                        <label htmlFor="tagline"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-300'
+                        >Tagline</label>
+                        <textarea name="tagline" id="tagline"
+                          placeholder='your tagline message'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={detailData?.value.tagline ?? ''}
+                          onChange={(event) => changeDetailData('tagline', event.target.value)}
+                        />
+                      </div>
+                  }
+
+                  {
+                    !!detailData?.value?.message?.length &&
+                      <div>
+                        <label htmlFor="message"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-300'
+                        >Message</label>
+                        <textarea name="message" id="message"
+                          placeholder='your message'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={detailData?.value.message ?? ''}
+                          onChange={(event) => changeDetailData('message', event.target.value)}
+                        />
+                      </div>
+                  }
+
+                  {
+                    !!detailData?.value?.gold?.length &&
+                      <div>
+                        <label htmlFor="gold"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-300'
+                        >Gold Message</label>
+                        <textarea name="gold" id="gold"
+                          placeholder='your gold message'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={detailData?.value.gold ?? ''}
+                          onChange={(event) => changeDetailData('gold', event.target.value)}
+                        />
+                      </div>
+                  }
+
+                  {
+                    !!detailData?.value?.black?.length &&
+                      <div>
+                        <label htmlFor="black"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-300'
+                        >Black Message</label>
+                        <textarea name="black" id="black"
+                          placeholder='your black message'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={detailData?.value.black ?? ''}
+                          onChange={(event) => changeDetailData('black', event.target.value)}
+                        />
+                      </div>
+                  }
+
+                  <div className='w-full flex justify-end'>
+                    <button
+                      type='submit'
+                      className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                        dark:bg-slate-700 dark:text-slate-300'
+                    >submit</button>
+                  </div>
+                </form>
+              </div>
+          }
           
           {/* deleting user */}
           {
@@ -774,12 +1085,64 @@ export default function Dashboard() {
                 </div>
               </div>
           }
+          
+          {/* deleting contact */}
+          {
+            'Delete_Contact' == showModal &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Deleting Contact</div>
+
+                <div >
+                  <div>Are you sure you want to the contact?</div>
+                  <div className='w-full flex justify-center items-center gap-4'>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-blue-300 text-blue-700
+                        hover:bg-blue-700 hover:text-blue-300 transition duration-100'
+
+                      onClick={() => setShowModal(null)}
+                    >cancel</button>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-red-300 text-red-700
+                        hover:bg-red-700 hover:text-red-300 transition duration-100'
+
+                      onClick={deleteContactFromDashboard}
+                    >delete</button>
+                  </div>
+                </div>
+              </div>
+          }
+          
+          {/* marking contact */}
+          {
+            'Mark_Contact' == showModal &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Marking Contact</div>
+
+                <div >
+                  <div>You are about to mark the contact as seen?</div>
+                  <div className='w-full flex justify-center items-center gap-4'>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-blue-300 text-blue-700
+                        hover:bg-blue-700 hover:text-blue-300 transition duration-100'
+
+                      onClick={() => setShowModal(null)}
+                    >cancel</button>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-green-300 text-green-700
+                        hover:bg-green-700 hover:text-green-300 transition duration-100'
+
+                      onClick={markContactFromDashboard}
+                    >continue</button>
+                  </div>
+                </div>
+              </div>
+          }
         </Modal>
       }
 
-{
+      {
         alert?.length ?
-          <div className='absolute top-3 left-0 right-0 transition-all duration-200 z-50'>
+          <div className='fixed top-3 left-0 right-0 transition-all duration-200 z-50'>
             <div 
               className='bg-red-700 text-red-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
                 mx-auto relative transition-all duration-200'
@@ -798,7 +1161,7 @@ export default function Dashboard() {
 
       {
         loading ?
-          <div className='absolute top-3 left-0 right-0 transition-all duration-200 z-50'>
+          <div className='fixed top-3 left-0 right-0 transition-all duration-200 z-50'>
             <div 
               className='bg-green-700 text-green-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
                 mx-auto relative transition-all duration-200'

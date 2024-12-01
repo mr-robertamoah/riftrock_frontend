@@ -10,17 +10,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '../redux/slices/auth';
 import { useNavigate } from 'react-router-dom';
 import { useGetUser } from '../composables/useGetUser';
+import { addDetails, addServices } from '../redux/slices/dashboard';
 
 function Home() {
 
   const  [isDarkMode, setIsDarkMode] = useState(false);
   const  [showUserDetials, setShowUserDetials] = useState(false);
   const user = useSelector((state) => state.auth.value);
+  const homeData = useSelector((state) => state.dashboard.value);
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { getUser: getAuthUser } = useGetUser()
 
   useEffect(() => {
+    getAll()
     getUser()
     if (typeof window !== 'undefined') {
       setIsDarkMode(localStorage.getItem('theme') === 'dark')
@@ -67,6 +70,18 @@ function Home() {
     .then(res => {
         console.log(res);
         dispatch(addUser(res.data))
+    })
+    .catch(error => {
+        console.log(error);
+    })
+  }
+
+  async function getAll() {
+    axios.get('')
+    .then(res => {
+        console.log(res);
+        dispatch(addDetails(res.data.details))
+        dispatch(addServices(res.data.services.data))
     })
     .catch(error => {
         console.log(error);

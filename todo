@@ -1,0 +1,2 @@
+- direct to login when request returns unauthorized, redirect to previous location in this instance
+- handle input errors during form submissions

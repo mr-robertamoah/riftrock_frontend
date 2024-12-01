@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import RiftRockLogo from './RiftRockLogo';
-import { div, p } from 'framer-motion/client';
 
 const contactInfo = [
   {
@@ -39,6 +38,81 @@ export const Contact = ({ isDarkMode = false }) => {
     triggerOnce: true,
     threshold: 0.1
   });
+  const emptyContactData = {
+    name: '',
+    email: '',
+    message: '',
+  }
+  const emptyAlert = {
+    message: '',
+    type: '',
+  }
+  const [contactData, setContactData] = useState(emptyContactData)
+  const  [alert, setAlert] = useState<{message: string, type: string}>(emptyAlert);
+  const  [loading, setLoading] = useState<boolean>(false);
+
+
+  async function sendContact(event) {
+    console.log('object');
+    event.preventDefault()
+
+    if (!contactData.email) {
+      return showFailureAlert('Email is required.')
+    }
+    
+    if (!contactData.message) {
+      return showFailureAlert('Message is required.')
+    }
+
+    setLoading(true)
+
+    axios.post('/contacts', {
+      ...contactData
+    })
+    .then((res) => {
+      console.log(res);
+      showSuccessAlert('Contact has successfully been sent.')
+      clearContactData()
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  } 
+
+  function changeContactData(key: string, value: string) {
+    clearAlert()
+    setContactData({
+      ...contactData,
+      [key]: value,
+    })
+  }
+
+  function showSuccessAlert(message: string) {
+    setAlert({
+      message,
+      type: 'Success'
+    })
+  }
+
+  function showFailureAlert(message: string) {
+    setAlert({
+      message,
+      type: 'Failure'
+    })
+  }
+
+  function clearAlert() {
+    if (alert?.message?.length)
+      setAlert(emptyAlert)
+  }
+
+  function clearContactData() {
+    setContactData(emptyContactData)
+  }
 
   return (
     <section id="contact" className="py-20 dark:bg-slate-900 bg-slate-200">
@@ -68,29 +142,35 @@ export const Contact = ({ isDarkMode = false }) => {
             className="dark:bg-slate-800 bg-slate-700 p-8 rounded-lg h-fit"
           >
             <h3 className="text-2xl font-bold text-white mb-6">Send Us a Message</h3>
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={sendContact}>
               <div>
                 <label className="block text-sm font-medium dark:text-gray-400 text-gray-200 mb-2">Name</label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2 dark:bg-slate-700 bg-slate-200 border border-slate-600 rounded-lg focus:outline-none focus:border-yellow-500 text-white"
+                  className="w-full px-4 py-2 dark:bg-slate-700 text-slate-700 bg-slate-200 border border-slate-600 rounded-lg focus:outline-none focus:border-yellow-500 dark:text-white"
                   placeholder="Your name"
+                  value={contactData.name}
+                  onChange={(event) => changeContactData('name', event.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-400 text-gray-200 mb-2">Email</label>
+                <label className="block text-sm font-medium dark:text-gray-400 text-gray-200 mb-2">Email *</label>
                 <input
                   type="email"
-                  className="w-full px-4 py-2 dark:bg-slate-700 bg-slate-200 border border-slate-600 rounded-lg focus:outline-none focus:border-yellow-500 text-white"
+                  className="w-full px-4 py-2 dark:bg-slate-700 text-slate-700 bg-slate-200 border border-slate-600 rounded-lg focus:outline-none focus:border-yellow-500 dark:text-white"
                   placeholder="your@email.com"
+                  value={contactData.email}
+                  onChange={(event) => changeContactData('email', event.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-400 text-gray-200 mb-2">Message</label>
+                <label className="block text-sm font-medium dark:text-gray-400 text-gray-200 mb-2">Message *</label>
                 <textarea
                   rows={4}
-                  className="w-full px-4 py-2 dark:bg-slate-700 bg-slate-200 border border-slate-600 rounded-lg focus:outline-none focus:border-yellow-500 text-white"
+                  className="w-full px-4 py-2 dark:bg-slate-700 text-slate-700 bg-slate-200 border border-slate-600 rounded-lg focus:outline-none focus:border-yellow-500 dark:text-white"
                   placeholder="Your message"
+                  value={contactData.message}
+                  onChange={(event) => changeContactData('message', event.target.value)}
                 />
               </div>
               <button
@@ -134,6 +214,44 @@ export const Contact = ({ isDarkMode = false }) => {
           </motion.div>
         </div>
       </div>
+
+      {
+        (['Success', 'Failure'].includes(alert?.type) && alert?.message.length) ?
+          <div className='fixed top-3 left-0 right-0 transition-all duration-200 z-50'>
+            <div 
+              className={`${alert.type == 'Success' ? 
+                  'bg-green-700 text-green-200' : 
+                  'bg-red-700 text-red-200'
+                } rounded p-2 py-4 w-[90%] md:w-[70%] text-center
+                mx-auto relative transition-all duration-200`}
+            >
+              {alert.message}
+
+              <div 
+                className={`absolute rounded-full w-6 h-6 p-2 flex
+                  justify-center items-center -top-2 -right-2 font-bold cursor-pointer ${alert.type == 'Success' ? 
+                  'text-green-700 bg-green-200' : 
+                  'text-red-700 bg-red-200'
+                }`}
+                onClick={clearAlert}
+              >&times;</div>
+            </div>
+          </div> :
+          <></>
+      }
+
+      {
+        loading ?
+          <div className='absolute top-3 left-0 right-0 transition-all duration-200 z-50'>
+            <div 
+              className='bg-green-700 text-green-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
+                mx-auto relative transition-all duration-200'
+            >
+              logging in
+            </div>
+          </div> :
+          <></>
+      }
     </section>
   );
 };

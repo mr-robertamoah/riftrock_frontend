@@ -4,6 +4,8 @@ const dashboardSlice = createSlice({
     name: 'dashboard',
     initialState: {
         value: {
+            contacts: [],
+            details: [],
             services: [],
             users: [],
         }
@@ -42,8 +44,46 @@ const dashboardSlice = createSlice({
                 1,
             )
         },
+        addContacts(state, data) {
+            state.value.contacts = [...data.payload]
+        },
+        updateContact(state, data) {
+            state.value.contacts.splice(
+                state.value.contacts.findIndex(contact => contact.id == data.payload.id),
+                1,
+                data.payload
+            )
+        },
+        deleteContact(state, data) {
+            state.value.contacts.splice(
+                state.value.contacts.findIndex(contact => contact.id == data.payload.id),
+                1,
+            )
+        },
+        addDetails(state, data) {
+            state.value.details = [...data.payload]
+        },
+        updateDetail(state, data) {
+            state.value.details.splice(
+                state.value.details.findIndex(detail => detail.id == data.payload.id),
+                1,
+                data.payload
+            )
+        },
     }
 })
 
-export const { addService, addServices, addUser, addUsers, updateUser, deleteUser } = dashboardSlice.actions;
+export const {
+    addService,
+    addServices,
+    addUser,
+    addUsers,
+    updateUser,
+    deleteUser,
+    addContacts,
+    updateContact,
+    deleteContact,
+    addDetails,
+    updateDetail,
+} = dashboardSlice.actions;
 export default dashboardSlice.reducer;
