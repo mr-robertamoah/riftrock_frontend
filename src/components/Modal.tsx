@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface ModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (event: any) => void;
   isDarkMode: boolean;
   children: React.ReactNode;
 }
@@ -20,7 +20,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         className={`relative p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-auto`}
       >
         <button
-          onClick={onClose}
+          onClick={(event) => onClose(event)}
+          type='button'
           className="absolute top-2 right-2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100"
         >
           &times;

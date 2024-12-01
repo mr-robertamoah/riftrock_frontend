@@ -29,8 +29,21 @@ const dashboardSlice = createSlice({
         addUsers(state, data) {
             state.value.users = [...data.payload]
         },
+        updateUser(state, data) {
+            state.value.users.splice(
+                state.value.users.findIndex(user => user.id == data.payload.id),
+                1,
+                data.payload
+            )
+        },
+        deleteUser(state, data) {
+            state.value.users.splice(
+                state.value.users.findIndex(user => user.id == data.payload.id),
+                1,
+            )
+        },
     }
 })
 
-export const { addService, addServices, addUser, addUsers } = dashboardSlice.actions;
+export const { addService, addServices, addUser, addUsers, updateUser, deleteUser } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
