@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import RiftRockLogo from './RiftRockLogo';
+import { useSelector } from 'react-redux';
 
 const contactInfo = [
   {
@@ -50,7 +51,12 @@ export const Contact = ({ isDarkMode = false }) => {
   const [contactData, setContactData] = useState(emptyContactData)
   const  [alert, setAlert] = useState<{message: string, type: string}>(emptyAlert);
   const  [loading, setLoading] = useState<boolean>(false);
+  const detailsData = useSelector((state) => state.dashboard.value.details)
+  const [contactDetailData, setContactDetailData] = useState(detailsData.find(detail => detail?.key == 'CONTACT_MESSAGE'));
 
+  useEffect(() => {
+    setContactDetailData(detailsData.find(detail => detail?.key == 'CONTACT_MESSAGE'))
+  }, [detailsData])
 
   async function sendContact(event) {
     console.log('object');
@@ -128,9 +134,9 @@ export const Contact = ({ isDarkMode = false }) => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-4">Get in Touch</h2>
+          <h2 className="text-4xl font-bold dark:text-white text-black/80 mb-4">{contactDetailData?.value?.tagline ?? 'Get in Touch'}</h2>
           <p className="dark:text-gray-400 text-gray-700 max-w-2xl mx-auto">
-            Ready to start your next mining project? Contact us today for expert consultation
+            {contactDetailData?.value?.message ?? 'Ready to start your next mining project? Contact us today for expert consultation'}
           </p>
         </motion.div>
 

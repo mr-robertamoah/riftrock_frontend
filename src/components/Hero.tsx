@@ -1,14 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useDarkMode } from '../composables/useDarkMode';
+import { useSelector } from 'react-redux';
 
 export const Hero = (
   { dark = false, onToggle = (theme: boolean) => null } : 
   { dark: boolean, onToggle: (theme: boolean) => void }) => {
 
   const {isDarkMode, setIsDarkMode} = useDarkMode({ dark });
+  const detailsData = useSelector((state) => state.dashboard.value.details)
+  const [heroDetailData, setHeroDetailData] = useState(detailsData.find(detail => detail?.key == 'TAGLINE'));
+  const [taglineShortData, setTaglineShortData] = useState(detailsData.find(detail => detail?.key == 'TAGLINE_SHORT'));
+
+  useEffect(() => {
+    setHeroDetailData(detailsData.find(detail => detail?.key == 'TAGLINE'))
+    setTaglineShortData(detailsData.find(detail => detail?.key == 'TAGLINE_SHORT'))
+  }, [detailsData])
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -38,8 +47,8 @@ export const Hero = (
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="block text-yellow-800 dark:text-yellow-500">Empowering Mining Excellence</span>
-          through Reliable Services
+          <span className="block text-yellow-800 dark:text-yellow-500">{heroDetailData?.value?.gold ?? 'Empowering Mining Excellence'}</span>
+          {heroDetailData?.value?.black ?? 'through Reliable Services'}
         </motion.h1>
         
         <motion.p 
@@ -48,7 +57,7 @@ export const Hero = (
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          Leading the industry with innovative solutions and sustainable practices
+          {taglineShortData?.value?.message ?? 'Leading the industry with innovative solutions and sustainable practices'}
         </motion.p>
         
         <motion.button 
