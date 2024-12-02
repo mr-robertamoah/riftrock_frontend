@@ -192,7 +192,7 @@ export const Contact = ({ isDarkMode = false }) => {
             {contactInfo.map((info, index) => (
               <div
                 key={index}
-                className="dark:bg-slate-800 bg-slate-700 p-6 rounded-lg"
+                className="dark:bg-slate-800 bg-slate-700 p-6 rounded-lg h-fit"
               >
                 <div className="w-12 mx-auto h-12 dark:bg-yellow-500 bg-yellow-800 rounded-lg flex items-center justify-center mb-4">
                   <info.icon className="w-6 h-6 dark:text-slate-900 text-slate-400" />

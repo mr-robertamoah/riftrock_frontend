@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { HardHat, Truck, Bus, Wrench } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const services = [
   {
@@ -31,6 +33,7 @@ export const Services = () => {
     triggerOnce: true,
     threshold: 0.1
   });
+  const servicesData = useSelector((state) => state.dashboard.value.services)
 
   return (
     <section id="services" className="py-20 dark:bg-slate-900 bg-white">
@@ -49,21 +52,41 @@ export const Services = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="bg-slate-600 dark:bg-slate-800 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-300"
-            >
-              <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <service.icon className="w-6 h-6 dark:text-slate-900 text-slate-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">{service.title}</h3>
-              <p className="dark:text-gray-400 text-gray-300">{service.description}</p>
-            </motion.div>
-          ))}
+          {
+            servicesData?.length ?
+            servicesData.map((service, index) => {
+              const IconComponent = Icons[service.icon] ?? Icons.HelpCircle
+
+              return <motion.div
+                key={service.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                className="bg-slate-600 dark:bg-slate-800 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-300"
+              >
+                <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <IconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">{service.title}</h3>
+                <p className="dark:text-gray-400 text-gray-300">{service.description}</p>
+              </motion.div>
+            }) :
+            services.map((service, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                className="bg-slate-600 dark:bg-slate-800 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-300"
+              >
+                <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <service.icon className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">{service.title}</h3>
+                <p className="dark:text-gray-400 text-gray-300">{service.description}</p>
+              </motion.div>
+            ))
+          }
         </div>
       </div>
     </section>

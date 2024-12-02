@@ -9,6 +9,7 @@ import { addUser } from '../redux/slices/auth';
 import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, deleteUser, addContacts, deleteContact, updateContact, addDetails, updateDetail } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
+import * as Icons from 'lucide-react';
 
 export default function Dashboard() {
   const [fullSideBar, setFullSideBar] = useState(false)
@@ -658,11 +659,15 @@ export default function Dashboard() {
               <div
                 className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
                 {
-                  dashboardData.services.map((service) => (
-                    <div key={service.id} 
+                  dashboardData.services.map((service) => {
+                    const IconComponent = Icons[service.icon] ?? Icons.HelpCircle
+
+                    return <div key={service.id} 
                       className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
                         '>
-                      <div></div>
+                      <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                        <IconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                      </div>
                       <div className='text-center font-bold'>{service.title}</div>
                       <div className='mt-3 mb-2 px-2'>{service.description}</div>
                       <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(service.createdAt)}</div>
@@ -697,7 +702,7 @@ export default function Dashboard() {
                         >delete</div>
                       </div>
                     </div> 
-                  ))
+                  })
                 }
     
                 {
