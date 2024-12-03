@@ -56,7 +56,7 @@ export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
                     flex justify-center items-center ml-auto mr-2 cursor-pointer
                     dark:bg-slate-600 dark:text-slate-300'
                   onClick={toggleLogin}
-                >X</div>
+                >&times;</div>
                 <div
                   className='dark:bg-slate-300 bg-slate-900 text-white w-fit mx-auto cursor-pointer
                     dark:text-slate-900 py-1 px-4 rounded border-b-2 border-yellow-700'
@@ -78,7 +78,7 @@ export const Navbar = ({ isDarkMode = false } : { isDarkMode: boolean }) => {
                     flex justify-center items-center ml-auto mr-2 cursor-pointer
                     dark:bg-slate-600 dark:text-slate-300'
                   onClick={toggleLogin}
-                >X</div>
+                >&times;</div>
                 <div
                   className='dark:bg-slate-300 bg-slate-900 text-white w-fit mx-auto cursor-pointer
                     dark:text-slate-900 py-1 px-4 rounded border-b-2 border-yellow-700'

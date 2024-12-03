@@ -143,7 +143,7 @@ function Login() {
                 className='absolute rounded-full w-6 h-6 p-2 text-red-700 bg-red-200 flex
                   justify-center items-center -top-2 -right-2 font-bold cursor-pointer'
                 onClick={clearAlert}
-              >X</div>
+              >&times;</div>
             </div>
           </div> :
           <></>

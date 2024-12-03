@@ -128,7 +128,7 @@ function Home() {
                                 event.stopPropagation();
                                 setShowUserDetials(false)}
                             }
-                        >X</div>
+                        >&times;</div>
                     </div>
                 }
             </div>
