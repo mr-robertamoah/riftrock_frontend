@@ -37,7 +37,6 @@ export default function Dashboard() {
     passwordConfirmation: '',
     email: '',
   }
-  const  [alert, setAlert] = useState<string | null>();
   const  [loading, setLoading] = useState<boolean>(false);
   const  [createServiceData, setCreateServiceData] = useState<{
     file: File|null, title: string, description: string, id?: number|null,
@@ -70,6 +69,11 @@ export default function Dashboard() {
     {name: 'Contacts', icon: Contact},
     {name: 'Emails', icon: Mail},
   ]
+  const emptyAlert = {
+    message: '',
+    type: '',
+  }
+  const  [alert, setAlert] = useState<{message: string, type: string}>(emptyAlert);
   type itemType = 'Users' | 'Details' | 'Services' | 'Contacts' | 'Emails'
   type modalActionsType = 'Create_Users' | 'Create_Details' | 'Create_Services' | 
     'Create_Contacts' | 'Create_Emails'
@@ -105,6 +109,25 @@ export default function Dashboard() {
     if (!name.length)
       name = 'No name'
     return name
+  }
+
+  function showSuccessAlert(message: string) {
+    setAlert({
+      message,
+      type: 'Success'
+    })
+  }
+
+  function showFailureAlert(message: string) {
+    setAlert({
+      message,
+      type: 'Failure'
+    })
+  }
+
+  function clearAlert() {
+    if (alert?.message?.length)
+      setAlert(emptyAlert)
   }
 
   function goHome() {
@@ -310,10 +333,6 @@ export default function Dashboard() {
 
   }
 
-  function showAlert(message: string) {
-    setAlert(message)
-  }
-
   async function createUserFromDashboard(event) {
     event.preventDefault()
     
@@ -321,15 +340,15 @@ export default function Dashboard() {
       return updateUserFromDashboard()
 
     if (!createUserData.email) {
-      return showAlert('Email is required.')
+      return showFailureAlert('Email is required.')
     }
     
     if (!createUserData.password) {
-      return showAlert('Password is required.')
+      return showFailureAlert('Password is required.')
     }
     
     if (createUserData.password !== createUserData.passwordConfirmation) {
-      return showAlert('Password confirmation has to match the password.')
+      return showFailureAlert('Password confirmation has to match the password.')
     }
 
     setLoading(true)
@@ -340,10 +359,11 @@ export default function Dashboard() {
     .then((res) => {
       console.log(res);
       dispatch(addDashboardUser(res.data))
+      setShowModal(null)
     })
     .catch((err) => {
       console.log(err);
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
@@ -360,14 +380,14 @@ export default function Dashboard() {
       createUserData.lastName !== otherUser.lastName &&
       createUserData.otherNames !== otherUser.otherNames
     ) {
-      return showAlert('No new information was provided.')
+      return showFailureAlert('No new information was provided.')
     }
     
     if (
       createUserData.password &&
       createUserData.password !== createUserData.passwordConfirmation
     ) {
-      return showAlert('Password confirmation has to match the password.')
+      return showFailureAlert('Password confirmation has to match the password.')
     }
     const data = {...createUserData}
 
@@ -395,7 +415,7 @@ export default function Dashboard() {
     })
     .catch((err) => {
       console.log(err);
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
@@ -416,7 +436,7 @@ export default function Dashboard() {
     })
     .catch((err) => {
       console.log(err);
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
@@ -437,7 +457,7 @@ export default function Dashboard() {
     })
     .catch((err) => {
       console.log(err);
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
@@ -456,7 +476,7 @@ export default function Dashboard() {
       (detail.value.tagline && detail.value.tagline == detailData.value.tagline) &&
       (detail.value.black && detail.value.black == detailData.value.black)
     ) {
-      return showAlert('No new information was provided.')
+      return showFailureAlert('No new information was provided.')
     }
 
     setLoading(true)
@@ -471,7 +491,7 @@ export default function Dashboard() {
     })
     .catch((err) => {
       console.log(err);
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
@@ -484,11 +504,11 @@ export default function Dashboard() {
 
   async function createServiceFromDashboard() {
     if (!createServiceData.title) {
-      return showAlert('Title is required.')
+      return showFailureAlert('Title is required.')
     }
     
     if (!createServiceData.description) {
-      return showAlert('Description is required.')
+      return showFailureAlert('Description is required.')
     }
 
     setLoading(true)
@@ -504,7 +524,7 @@ export default function Dashboard() {
     })
     .catch((err) => {
       console.log(err);
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
@@ -517,11 +537,6 @@ export default function Dashboard() {
 
     if (activeSection == 'Users')
       getUsers()
-  }
-
-  function clearAlert() {
-    if (alert?.length)
-      setAlert(null)
   }
 
   function changeCreateUserData(key: string, value: string) {
@@ -1145,23 +1160,30 @@ export default function Dashboard() {
         </Modal>
       }
 
+      {/* alerting */}
       {
-        alert?.length ?
-          <div className='fixed top-3 left-0 right-0 transition-all duration-200 z-50'>
-            <div 
-              className='bg-red-700 text-red-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
-                mx-auto relative transition-all duration-200'
-            >
-              {alert}
+        (['Success', 'Failure'].includes(alert?.type) && alert?.message.length) ?
+        <div className='fixed top-3 left-0 right-0 transition-all duration-200 z-50'>
+          <div 
+            className={`${alert.type == 'Success' ? 
+                'bg-green-700 text-green-200' : 
+                'bg-red-700 text-red-200'
+              } rounded p-2 py-4 w-[90%] md:w-[70%] text-center
+              mx-auto relative transition-all duration-200`}
+          >
+            {alert.message}
 
-              <div 
-                className='absolute rounded-full w-6 h-6 p-2 text-red-700 bg-red-200 flex
-                  justify-center items-center -top-2 -right-2 font-bold cursor-pointer'
-                onClick={clearAlert}
-              >X</div>
-            </div>
-          </div> :
-          <></>
+            <div 
+              className={`absolute rounded-full w-6 h-6 p-2 flex
+                justify-center items-center -top-2 -right-2 font-bold cursor-pointer ${alert.type == 'Success' ? 
+                'text-green-700 bg-green-200' : 
+                'text-red-700 bg-red-200'
+              }`}
+              onClick={clearAlert}
+            >&times;</div>
+          </div>
+        </div> :
+        <></>
       }
 
       {
