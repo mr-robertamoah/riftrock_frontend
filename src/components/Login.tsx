@@ -54,7 +54,12 @@ function Login() {
       console.log(err);
       localStorage.removeItem('access_token');
       dispatch(removeUser())
-      showAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+      let message = err.message
+
+      if (err.status == 401)
+        message = 'Invalid email or password'
+
+      showAlert(message ?? 'Something unfortunate happened. Try again shortly.')
     })
     .finally(() => {
       setLoading(false)
