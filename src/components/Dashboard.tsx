@@ -37,6 +37,22 @@ export default function Dashboard() {
     passwordConfirmation: '',
     email: '',
   }
+  const emptyDetailData = {
+    key: '', 
+    info: '', 
+    value: {},
+  }
+  const emptyContactData = {
+    email: '', name: '', message: '',
+  }
+  const emptyPasswordData = {
+    password: '', 
+    passwordConfirmation: '',
+  }
+  const emptyUserData = {
+    firstName: '', lastName: '',
+    otherNames: '',
+  }
   const  [loading, setLoading] = useState<boolean>(false);
   const  [createServiceData, setCreateServiceData] = useState<{
     file: File|null, title: string, description: string, id?: number|null,
@@ -48,13 +64,21 @@ export default function Dashboard() {
   }>(emptyCreateUserData);
   const  [createContactData, setCreateContactData] = useState<{
     email: string, name: string, message: string, id?: number
-  } | null>(null);
+  } | null>(emptyContactData);
   const  [detailData, setDetailData] = useState<{
     key: string, 
     info?: string, 
     value: { message?: string, gold?: string, black?: string, tagline?: string }, 
     id?: number
-  } | null>(null);
+  } | null>(emptyDetailData);
+  const  [passwordData, setPasswordData] = useState<{
+    password: string, 
+    passwordConfirmation: string,
+  }>(emptyPasswordData);
+  const  [userData, setUserData] = useState<{
+    firstName: string, lastName: string,
+    otherNames: string,
+  }>(emptyUserData);
   const [pages, setPages] = useState({
     'Services': {next: 0, current: 0, previous: 0},
     'Emails': {next: 0, current: 0, previous: 0},
@@ -84,6 +108,10 @@ export default function Dashboard() {
 
     callable()
   }, [])
+
+  useEffect(() => {
+    resetUserData()
+  }, [user])
 
   async function callable() {
     const u = await getUser(user)
@@ -360,6 +388,7 @@ export default function Dashboard() {
       console.log(res);
       dispatch(addDashboardUser(res.data))
       setShowModal(null)
+      clearCreateUserData()
     })
     .catch((err) => {
       console.log(err);
@@ -412,6 +441,71 @@ export default function Dashboard() {
       console.log(res);
       dispatch(updateUser(res.data))
       setShowModal(null)
+      clearCreateUserData()
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function updateAccountInformation(event) {
+    event.preventDefault()
+
+    if (
+      userData.firstName == user.firstName &&
+      userData.lastName == user.lastName &&
+      userData.otherNames == user.otherNames
+    ) {
+      return showFailureAlert('No new information was provided.')
+    }
+
+    setLoading(true)
+
+    axios.patch(`/users`, {
+      ...userData
+    })
+    .then((res) => {
+      console.log(res);
+      dispatch(addUser(res.data))
+      resetUserData()
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function updateAccountPassword(event) {
+    event.preventDefault()
+
+    if (
+      !passwordData.password
+    ) {
+      return showFailureAlert('Password is required.')
+    }
+    
+    if (
+      passwordData.password &&
+      passwordData.password !== passwordData.passwordConfirmation
+    ) {
+      return showFailureAlert('Password confirmation has to match the password.')
+    }
+
+    setLoading(true)
+
+    axios.patch(`/users/password`, {
+      ...passwordData
+    })
+    .then((res) => {
+      console.log(res);
+      clearPasswordData()
     })
     .catch((err) => {
       console.log(err);
@@ -488,6 +582,7 @@ export default function Dashboard() {
       console.log(res);
       dispatch(updateDetail(res.data))
       setShowModal(null)
+      clearDetailData()
     })
     .catch((err) => {
       console.log(err);
@@ -500,6 +595,31 @@ export default function Dashboard() {
 
   function clearCreateUserData() {
     setCreateUserData(emptyCreateUserData)
+  }
+
+  function clearDetailData() {
+    setDetailData(emptyDetailData)
+  }
+
+  function clearUserData() {
+    setUserData(emptyUserData)
+  }
+
+  function clearContactData() {
+    setCreateContactData(emptyContactData)
+  }
+
+  function clearPasswordData() {
+    setPasswordData(emptyPasswordData)
+  }
+
+  function resetUserData() {
+    if (!user) return
+    setUserData({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      otherNames: user.otherNames
+    })
   }
 
   async function createServiceFromDashboard() {
@@ -531,6 +651,25 @@ export default function Dashboard() {
     })
   }
 
+  async function makeUserAdmin(u) {
+    setLoading(true)
+
+    axios.patch('/users/make-admin', {
+      userId: u.id
+    })
+    .then((res) => {
+      console.log(res);
+      dispatch(updateUser(res.data))
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
   function getItems() {
     if (activeSection == 'Services')
       getServices()
@@ -543,6 +682,22 @@ export default function Dashboard() {
     clearAlert()
     setCreateUserData({
       ...createUserData,
+      [key]: value,
+    })
+  }
+
+  function changeUserData(key: string, value: string) {
+    clearAlert()
+    setUserData({
+      ...userData,
+      [key]: value,
+    })
+  }
+
+  function changePasswordData(key: 'password' | 'passwordConfirmation', value: string) {
+    clearAlert()
+    setPasswordData({
+      ...passwordData,
       [key]: value,
     })
   }
@@ -630,6 +785,31 @@ export default function Dashboard() {
           }
 
           <div className='mt-4 flex flex-col justify-end items-center'>
+            <div className={`${'Account' == activeSection ? 
+              'font-bold' : 
+              'text-slate-300 '} 
+              mt-4 hover:text-slate-100 cursor-pointer items-center gap-2 w-full
+              `}
+              onClick={() => {
+                resetUserData()
+                clickedSection('Account')
+              }}
+            >
+              {
+                fullSideBar ?
+                  <div 
+                    title={'your account'}
+                    className={`grid ${fullSideBar ? ' grid-cols-2 px-4' : ' grid-cols-1 px-auto'}`}>
+                    <div className={`${fullSideBar ? 'pl-2' : 'mx-auto w-fit'}`}>U</div>
+                    <div className='text-ellipsis w-full overflow-hidden'>{user.email}</div>
+                  </div> :
+                  <div
+                    title={'your account'}
+                    className='text-center'
+                  >U</div>
+                }
+            </div>
+
             {
               sections.map((section, idx) => (
                 <div key={idx} className={`${section.name == activeSection ? 
@@ -657,10 +837,10 @@ export default function Dashboard() {
             }
           </div>
         </div>
-        <div className={`w-full relative px-2 pt-8 ${dashboardData[activeSection.toLowerCase()].length == 0 ?
+        <div className={`w-full relative px-2 pt-8 ${activeSection !== 'Account' && dashboardData[activeSection.toLowerCase()].length == 0 ?
           'flex justify-start gap-44 flex-col items-center': ''}`}>
           {
-            !['Contacts', 'Emails', 'Details'].includes(activeSection) &&
+            !['Contacts', 'Emails', 'Details', 'Account'].includes(activeSection) &&
               <div className='absolute top-2 right-4 p-2'>
                 <button className='rounded py-1 px-2 bg-teal-700'
                 onClick={createDashboardItem}
@@ -783,22 +963,32 @@ export default function Dashboard() {
               <div
                 className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
                 {
-                  dashboardData.users.map((user) => (
-                    <div key={user.id} 
+                  dashboardData.users.map((u) => (
+                    <div key={u.id} 
                       className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
                         '>
                       <div></div>
-                      <div className='text-center font-bold'>{getUserName(user)}</div>
-                      <div className='mt-3 mb-2 px-2'>{user.email}</div>
-                      <div className='mt-3 mb-2 px-2 text-sm font-bold'>{user.role.toLowerCase().replace('_', ' ')}</div>
-                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(user.createdAt)}</div>
+                      <div className='text-center font-bold'>{getUserName(u)}</div>
+                      <div className='mt-3 mb-2 px-2'>{u.email}</div>
+                      <div className='mt-3 mb-2 px-2 text-sm font-bold'>{u.role.toLowerCase().replace('_', ' ')}</div>
+                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(u.createdAt)}</div>
     
                       <div className='flex items-center justify-end gap-2'>
+                        {
+                          (user.role == 'SUPER_ADMIN' && u.role == 'USER') &&
+                            <div 
+                              className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                              onClick={() => {
+                                makeUserAdmin(u)
+                              }}
+                            >make admin</div>
+                        }
                         <div 
                           className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
                             hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
                           onClick={() => {
-                            updateCreateUserData(user)
+                            updateCreateUserData(u)
                             setShowModal('Edit_User')
                           }}
                         >edit</div>
@@ -878,27 +1068,121 @@ export default function Dashboard() {
               </div>
             </div>
           }
+
+          {/* Account */}
+          {
+            activeSection == 'Account' &&
+            <div>
+              <div
+                className='p-6 gap-3 grid grid-cols-1'>
+                <div>
+                  <div className='text-center font-bold mb-4'>Your Information</div>
+                  <form 
+                    onSubmit={updateAccountInformation}
+                    className='rounded bg-slate-200 p-3'
+                  >
+                    <label htmlFor="firstName"
+                      className='mb-2 font-bold dark:text-slate-800 text-slate-500'
+                    >First Name</label>
+                    <input type="firstName" name="firstName" id="firstName"
+                      placeholder='Robert'
+                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                      value={userData.firstName ?? ''}
+                      onChange={(event) => changeUserData('firstName', event.target.value)}
+                    />
+
+                    <label htmlFor="lastName"
+                      className='mb-2 font-bold dark:text-slate-800 text-slate-500'
+                    >Last Name</label>
+                    <input type="lastName" name="lastName" id="lastName"
+                      placeholder='Amoah'
+                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                      value={userData.lastName ?? ''}
+                      onChange={(event) => changeUserData('lastName', event.target.value)}
+                    />
+
+                    <label htmlFor="otherNames"
+                      className='mb-2 font-bold dark:text-slate-800 text-slate-500'
+                    >Other Names</label>
+                    <input type="otherNames" name="otherNames" id="otherNames"
+                      placeholder='Paa'
+                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                      value={userData.otherNames ?? ''}
+                      onChange={(event) => changeUserData('otherNames', event.target.value)}
+                    />
+
+                    <div className='w-full flex justify-end'>
+                      <button
+                        type='submit'
+                        className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                          dark:bg-slate-700 dark:text-slate-300'
+                      >submit</button>
+                    </div>
+                  </form>
+                </div>
+
+                <div>
+                  <div className='text-center font-bold mb-4'>Change Password</div>
+                  <form 
+                    onSubmit={updateAccountPassword}
+                    className='rounded bg-slate-200 p-3'
+                  >
+                    <label htmlFor="password"
+                      className='mb-2 font-bold dark:text-slate-800 text-slate-500 mt-5'
+                    >Password *</label>
+                    <input type="password" name="password" id="password"
+                      placeholder='*************'
+                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                      value={passwordData.password ?? ''}
+                      onChange={(event) => changePasswordData('password', event.target.value)}
+                    />
+
+                    <label htmlFor="passwordConfirmation"
+                      className='mb-2 font-bold dark:text-slate-800 text-slate-500 mt-5'
+                    >Password Confirmation *</label>
+                    <input type="password" name="passwordConfirmation" id="passwordConfirmation"
+                      placeholder='*************'
+                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                      value={passwordData.passwordConfirmation ?? ''}
+                      onChange={(event) => changePasswordData('passwordConfirmation', event.target.value)}
+                    />
+
+                    <div className='w-full flex justify-end'>
+                      <button
+                        type='submit'
+                        className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                          dark:bg-slate-700 dark:text-slate-300'
+                      >submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          }
           
-          <div className='grid grid-cols-2 p-2 my-4 gap-5'>
-            {
-              (pages[activeSection].previous > 0) ?
-                <div 
-                  className='flex justify-end p-2 cursor-pointer'
-                  title={`get previous ${activeSection}`}
-                  onClick={getPreviousItems}
-                  ><ChevronsLeftIcon /></div> :
-                <div></div>
-            }
-            {
-              (pages[activeSection].next > 0) ?
-                <div 
-                  className='flex p-2 cursor-pointer'
-                  title={`get next ${activeSection}`}
-                  onClick={getNextItems}
-                ><ChevronsRightIcon /></div> :
-                <div></div>
-            }
-          </div>
+          {
+            activeSection !== 'Account' &&
+              <div className='grid grid-cols-2 p-2 my-4 gap-5'>
+                {
+                  (pages[activeSection].previous > 0) ?
+                    <div 
+                      className='flex justify-end p-2 cursor-pointer'
+                      title={`get previous ${activeSection}`}
+                      onClick={getPreviousItems}
+                      ><ChevronsLeftIcon /></div> :
+                    <div></div>
+                }
+                {
+                  (pages[activeSection].next > 0) ?
+                    <div 
+                      className='flex p-2 cursor-pointer'
+                      title={`get next ${activeSection}`}
+                      onClick={getNextItems}
+                    ><ChevronsRightIcon /></div> :
+                    <div></div>
+                }
+              </div>
+          }
         </div>
       </div>
 
@@ -1193,7 +1477,7 @@ export default function Dashboard() {
               className='bg-green-700 text-green-200 rounded p-2 py-4 w-[90%] md:w-[70%] text-center
                 mx-auto relative transition-all duration-200'
             >
-              logging in
+              loading
             </div>
           </div> :
           <></>
