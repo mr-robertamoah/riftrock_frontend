@@ -767,7 +767,8 @@ export default function Dashboard() {
         </div>
       </div>
       <div className='flex justify-between'>
-        <div className={`${fullSideBar ? 'min-w-[200px]' : 'w-fit'} p-2 bg-slate-600 h-screen`}>
+        {/* nav section */}
+        <div className={`${fullSideBar ? 'min-w-[200px]' : 'w-fit'} p-2 bg-slate-600 min-h-screen`}>
           <div className='mx-auto w-fit'>
             <button
               onClick={() => setFullSideBar(!fullSideBar)}
@@ -837,351 +838,359 @@ export default function Dashboard() {
             }
           </div>
         </div>
-        <div className={`w-full relative px-2 pt-8 ${activeSection !== 'Account' && dashboardData[activeSection.toLowerCase()].length == 0 ?
+        {/* main section */}
+        <div 
+          className={`w-full relative px-2 pt-8 ${activeSection !== 'Account' && dashboardData[activeSection.toLowerCase()].length == 0 ?
           'flex justify-start gap-44 flex-col items-center': ''}`}>
           {
-            !['Contacts', 'Emails', 'Details', 'Account'].includes(activeSection) &&
-              <div className='absolute top-2 right-4 p-2'>
-                <button className='rounded py-1 px-2 bg-teal-700'
-                onClick={createDashboardItem}
-                >create</button>
-              </div>
-          }
-          {/* services */}
-          {
-            activeSection == 'Services' &&
+            user ?
             <div>
-              <div
-                className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
-                {
-                  dashboardData.services.map((service) => {
-                    const IconComponent = Icons[service.icon] ?? Icons.HelpCircle
+              {
+                !['Contacts', 'Emails', 'Details', 'Account'].includes(activeSection) &&
+                  <div className='absolute top-2 right-4 p-2'>
+                    <button className='rounded py-1 px-2 bg-teal-700'
+                    onClick={createDashboardItem}
+                    >create</button>
+                  </div>
+              }
+              {/* services */}
+              {
+                activeSection == 'Services' &&
+                <div>
+                  <div
+                    className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
+                    {
+                      dashboardData.services.map((service) => {
+                        const IconComponent = Icons[service.icon] ?? Icons.HelpCircle
 
-                    return <div key={service.id} 
-                      className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
-                        '>
-                      <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                        <IconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
-                      </div>
-                      <div className='text-center font-bold'>{service.title}</div>
-                      <div className='mt-3 mb-2 px-2'>{service.description}</div>
-                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(service.createdAt)}</div>
-    
-                      <div className='flex items-center justify-end gap-2'>
-                        {
-                          service.details?.length > 0 &&
+                        return <div key={service.id} 
+                          className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
+                            '>
+                          <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                            <IconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                          </div>
+                          <div className='text-center font-bold'>{service.title}</div>
+                          <div className='mt-3 mb-2 px-2'>{service.description}</div>
+                          <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(service.createdAt)}</div>
+        
+                          <div className='flex items-center justify-end gap-2'>
+                            {
+                              service.details?.length > 0 &&
+                                <div 
+                                  className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                    hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                                  onClick={() => {
+                                    updateCreateServiceData(service)
+                                    setShowModal('View_Service')
+                                  }}
+                                >view</div>
+                              }
                             <div 
-                              className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
-                                hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                              className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
                               onClick={() => {
                                 updateCreateServiceData(service)
-                                setShowModal('View_Service')
+                                setShowModal('Edit_Service')
                               }}
-                            >view</div>
-                          }
-                        <div 
-                          className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
-                          onClick={() => {
-                            updateCreateServiceData(service)
-                            setShowModal('Edit_Service')
-                          }}
-                        >edit</div>
-                        <div 
-                          className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
-                          onClick={() => {
-                            updateCreateServiceData(service)
-                            setShowModal('Delete_Service')
-                          }}
-                        >delete</div>
-                      </div>
-                    </div> 
-                  })
-                }
-    
-                {
-                  dashboardData.services.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
-                  >No services available</div>
-                }
-              </div>
-            </div>
-          }
-          {/* contacts */}
-          {
-            activeSection == 'Contacts' &&
-            <div>
-              <div
-                className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
-                {
-                  dashboardData.contacts.map((contact) => (
-                    <div key={contact.id} 
-                      className={`rounded h-fit ${contact.seen ? 'bg-green-300' : 'bg-slate-300'} shadow-md shadow-yellow-700 text-slate-700 p-2
-                        `}>
-                      <div></div>
-                      <div className='text-center font-bold'>{contact.name?.length ? contact.name : 'No name'}</div>
-                      <div className='mt-3 mb-2 px-2'>{contact.message}</div>
-                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(contact.createdAt)}</div>
-    
-                      <div className='flex items-center justify-end gap-2'>
-                        {
-                          !contact.seen &&
+                            >edit</div>
                             <div 
-                              className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
-                                hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                              className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
+                              onClick={() => {
+                                updateCreateServiceData(service)
+                                setShowModal('Delete_Service')
+                              }}
+                            >delete</div>
+                          </div>
+                        </div> 
+                      })
+                    }
+        
+                    {
+                      dashboardData.services.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
+                      >No services available</div>
+                    }
+                  </div>
+                </div>
+              }
+              {/* contacts */}
+              {
+                activeSection == 'Contacts' &&
+                <div>
+                  <div
+                    className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
+                    {
+                      dashboardData.contacts.map((contact) => (
+                        <div key={contact.id} 
+                          className={`rounded h-fit ${contact.seen ? 'bg-green-300' : 'bg-slate-300'} shadow-md shadow-yellow-700 text-slate-700 p-2
+                            `}>
+                          <div></div>
+                          <div className='text-center font-bold'>{contact.name?.length ? contact.name : 'No name'}</div>
+                          <div className='mt-3 mb-2 px-2'>{contact.message}</div>
+                          <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(contact.createdAt)}</div>
+        
+                          <div className='flex items-center justify-end gap-2'>
+                            {
+                              !contact.seen &&
+                                <div 
+                                  className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                    hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                                  onClick={() => {
+                                    updateCreateContactData(contact)
+                                    setShowModal('Mark_Contact')
+                                  }}
+                                >mark as seen</div>
+                              }
+                            <div 
+                              className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
                               onClick={() => {
                                 updateCreateContactData(contact)
-                                setShowModal('Mark_Contact')
+                                setShowModal('Delete_Contact')
                               }}
-                            >mark as seen</div>
-                          }
-                        <div 
-                          className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
-                          onClick={() => {
-                            updateCreateContactData(contact)
-                            setShowModal('Delete_Contact')
-                          }}
-                        >delete</div>
-                      </div>
-                    </div> 
-                  ))
-                }
-    
-                {
-                  dashboardData.contacts.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
-                  >No contacts available</div>
-                }
-              </div>
-            </div>
-          }
+                            >delete</div>
+                          </div>
+                        </div> 
+                      ))
+                    }
+        
+                    {
+                      dashboardData.contacts.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
+                      >No contacts available</div>
+                    }
+                  </div>
+                </div>
+              }
 
-          {/* users */}
-          {
-            activeSection == 'Users' &&
-            <div>
-              <div
-                className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
-                {
-                  dashboardData.users.map((u) => (
-                    <div key={u.id} 
-                      className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
-                        '>
-                      <div></div>
-                      <div className='text-center font-bold'>{getUserName(u)}</div>
-                      <div className='mt-3 mb-2 px-2'>{u.email}</div>
-                      <div className='mt-3 mb-2 px-2 text-sm font-bold'>{u.role.toLowerCase().replace('_', ' ')}</div>
-                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(u.createdAt)}</div>
-    
-                      <div className='flex items-center justify-end gap-2'>
-                        {
-                          (user.role == 'SUPER_ADMIN' && u.role == 'USER') &&
+              {/* users */}
+              {
+                activeSection == 'Users' &&
+                <div>
+                  <div
+                    className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
+                    {
+                      dashboardData.users.map((u) => (
+                        <div key={u.id} 
+                          className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
+                            '>
+                          <div></div>
+                          <div className='text-center font-bold'>{getUserName(u)}</div>
+                          <div className='mt-3 mb-2 px-2'>{u.email}</div>
+                          <div className='mt-3 mb-2 px-2 text-sm font-bold'>{u.role.toLowerCase().replace('_', ' ')}</div>
+                          <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(u.createdAt)}</div>
+        
+                          <div className='flex items-center justify-end gap-2'>
+                            {
+                              (user.role == 'SUPER_ADMIN' && u.role == 'USER') &&
+                                <div 
+                                  className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                    hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                                  onClick={() => {
+                                    makeUserAdmin(u)
+                                  }}
+                                >make admin</div>
+                            }
                             <div 
-                              className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
-                                hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                              className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
                               onClick={() => {
-                                makeUserAdmin(u)
+                                updateCreateUserData(u)
+                                setShowModal('Edit_User')
                               }}
-                            >make admin</div>
-                        }
-                        <div 
-                          className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
-                          onClick={() => {
-                            updateCreateUserData(u)
-                            setShowModal('Edit_User')
-                          }}
-                        >edit</div>
-                        <div 
-                          className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
-                          onClick={() => {
-                            setShowModal('Delete_User')
-                          }}
-                        >delete</div>
-                      </div>
-                    </div> 
-                  ))
-                }
-    
-                {
-                  dashboardData.users.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
-                  >No users available</div>
-                }
-              </div>
-            </div>
-          }
-
-          {/* details */}
-          {
-            activeSection == 'Details' &&
-            <div>
-              <div
-                className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
-                {
-                  dashboardData.details.map((detail) => (
-                    <div key={detail.id} 
-                      className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-800 p-2
-                        '
-                    >
-                      <div className='text-center font-bold capitalize'>{detail.key?.toLowerCase()?.replace('_', ' ')}</div>
-                      {
-                        detail.value.tagline?.length > 0 &&
-                          <div className='mt-3 mb-2 px-2'><div className='text-blue-700 text-sm font-bold'>Tagline</div>{detail.value.tagline}</div>
-                      }
-                      {
-                        detail.value.message?.length > 0 &&
-                          <div className='mt-3 mb-2 px-2'>{detail.value.message}</div>
-                      }
-                      {
-                        detail.value.gold?.length > 0 &&
-                          <div className='mt-3 mb-2 px-2'><div className='text-yellow-700 text-sm font-bold'>Gold</div>{detail.value.gold}</div>
-                      }
-                      {
-                        detail.value.black?.length > 0 &&
-                          <div className='mt-3 mb-2 px-2'><div className='text-slate-800 text-sm font-bold'>Black</div>{detail.value.black}</div>
-                      }
-                      {
-                        detail.info?.length > 0 &&
-                          <div className='mt-3 my-4 px-2 text-slate-600'><div className='text-black text-sm font-bold'>Note</div>{detail.info}</div>
-                      }
-                      <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(detail.updatedAt)}</div>
-    
-                      <div className='flex items-center justify-end gap-2'>
-                        <div 
-                          className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
-                            hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
-                          onClick={() => {
-                            updateDetailData(detail)
-                            setShowModal('Edit_Detail')
-                          }}
-                        >edit</div>
-                      </div>
-                    </div> 
-                  ))
-                }
-    
-                {
-                  dashboardData.details.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
-                  >No details available</div>
-                }
-              </div>
-            </div>
-          }
-
-          {/* Account */}
-          {
-            activeSection == 'Account' &&
-            <div>
-              <div
-                className='p-6 gap-3 grid grid-cols-1'>
-                <div>
-                  <div className='text-center font-bold mb-4'>Your Information</div>
-                  <form 
-                    onSubmit={updateAccountInformation}
-                    className='rounded bg-slate-200 p-3'
-                  >
-                    <label htmlFor="firstName"
-                      className='mb-2 font-bold dark:text-slate-800 text-slate-500'
-                    >First Name</label>
-                    <input type="firstName" name="firstName" id="firstName"
-                      placeholder='Robert'
-                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
-                      value={userData.firstName ?? ''}
-                      onChange={(event) => changeUserData('firstName', event.target.value)}
-                    />
-
-                    <label htmlFor="lastName"
-                      className='mb-2 font-bold dark:text-slate-800 text-slate-500'
-                    >Last Name</label>
-                    <input type="lastName" name="lastName" id="lastName"
-                      placeholder='Amoah'
-                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
-                      value={userData.lastName ?? ''}
-                      onChange={(event) => changeUserData('lastName', event.target.value)}
-                    />
-
-                    <label htmlFor="otherNames"
-                      className='mb-2 font-bold dark:text-slate-800 text-slate-500'
-                    >Other Names</label>
-                    <input type="otherNames" name="otherNames" id="otherNames"
-                      placeholder='Paa'
-                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
-                      value={userData.otherNames ?? ''}
-                      onChange={(event) => changeUserData('otherNames', event.target.value)}
-                    />
-
-                    <div className='w-full flex justify-end'>
-                      <button
-                        type='submit'
-                        className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
-                          dark:bg-slate-700 dark:text-slate-300'
-                      >submit</button>
-                    </div>
-                  </form>
+                            >edit</div>
+                            <div 
+                              className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
+                              onClick={() => {
+                                setShowModal('Delete_User')
+                              }}
+                            >delete</div>
+                          </div>
+                        </div> 
+                      ))
+                    }
+        
+                    {
+                      dashboardData.users.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
+                      >No users available</div>
+                    }
+                  </div>
                 </div>
+              }
 
+              {/* details */}
+              {
+                activeSection == 'Details' &&
                 <div>
-                  <div className='text-center font-bold mb-4'>Change Password</div>
-                  <form 
-                    onSubmit={updateAccountPassword}
-                    className='rounded bg-slate-200 p-3'
-                  >
-                    <label htmlFor="password"
-                      className='mb-2 font-bold dark:text-slate-800 text-slate-500 mt-5'
-                    >Password *</label>
-                    <input type="password" name="password" id="password"
-                      placeholder='*************'
-                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
-                      value={passwordData.password ?? ''}
-                      onChange={(event) => changePasswordData('password', event.target.value)}
-                    />
-
-                    <label htmlFor="passwordConfirmation"
-                      className='mb-2 font-bold dark:text-slate-800 text-slate-500 mt-5'
-                    >Password Confirmation *</label>
-                    <input type="password" name="passwordConfirmation" id="passwordConfirmation"
-                      placeholder='*************'
-                      className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
-                      value={passwordData.passwordConfirmation ?? ''}
-                      onChange={(event) => changePasswordData('passwordConfirmation', event.target.value)}
-                    />
-
-                    <div className='w-full flex justify-end'>
-                      <button
-                        type='submit'
-                        className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
-                          dark:bg-slate-700 dark:text-slate-300'
-                      >submit</button>
-                    </div>
-                  </form>
+                  <div
+                    className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
+                    {
+                      dashboardData.details.map((detail) => (
+                        <div key={detail.id} 
+                          className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-800 p-2
+                            '
+                        >
+                          <div className='text-center font-bold capitalize'>{detail.key?.toLowerCase()?.replace('_', ' ')}</div>
+                          {
+                            detail.value.tagline?.length > 0 &&
+                              <div className='mt-3 mb-2 px-2'><div className='text-blue-700 text-sm font-bold'>Tagline</div>{detail.value.tagline}</div>
+                          }
+                          {
+                            detail.value.message?.length > 0 &&
+                              <div className='mt-3 mb-2 px-2'>{detail.value.message}</div>
+                          }
+                          {
+                            detail.value.gold?.length > 0 &&
+                              <div className='mt-3 mb-2 px-2'><div className='text-yellow-700 text-sm font-bold'>Gold</div>{detail.value.gold}</div>
+                          }
+                          {
+                            detail.value.black?.length > 0 &&
+                              <div className='mt-3 mb-2 px-2'><div className='text-slate-800 text-sm font-bold'>Black</div>{detail.value.black}</div>
+                          }
+                          {
+                            detail.info?.length > 0 &&
+                              <div className='mt-3 my-4 px-2 text-slate-600'><div className='text-black text-sm font-bold'>Note</div>{detail.info}</div>
+                          }
+                          <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(detail.updatedAt)}</div>
+        
+                          <div className='flex items-center justify-end gap-2'>
+                            <div 
+                              className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
+                                hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
+                              onClick={() => {
+                                updateDetailData(detail)
+                                setShowModal('Edit_Detail')
+                              }}
+                            >edit</div>
+                          </div>
+                        </div> 
+                      ))
+                    }
+        
+                    {
+                      dashboardData.details.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
+                      >No details available</div>
+                    }
+                  </div>
                 </div>
-              </div>
-            </div>
-          }
-          
-          {
-            activeSection !== 'Account' &&
-              <div className='grid grid-cols-2 p-2 my-4 gap-5'>
-                {
-                  (pages[activeSection].previous > 0) ?
-                    <div 
-                      className='flex justify-end p-2 cursor-pointer'
-                      title={`get previous ${activeSection}`}
-                      onClick={getPreviousItems}
-                      ><ChevronsLeftIcon /></div> :
-                    <div></div>
-                }
-                {
-                  (pages[activeSection].next > 0) ?
-                    <div 
-                      className='flex p-2 cursor-pointer'
-                      title={`get next ${activeSection}`}
-                      onClick={getNextItems}
-                    ><ChevronsRightIcon /></div> :
-                    <div></div>
-                }
-              </div>
+              }
+
+              {/* Account */}
+              {
+                activeSection == 'Account' &&
+                <div>
+                  <div
+                    className='p-6 gap-3 grid grid-cols-1'>
+                    <div>
+                      <div className='text-center font-bold mb-4'>Your Information</div>
+                      <form 
+                        onSubmit={updateAccountInformation}
+                        className='rounded bg-slate-200 p-3'
+                      >
+                        <label htmlFor="firstName"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-500'
+                        >First Name</label>
+                        <input type="firstName" name="firstName" id="firstName"
+                          placeholder='Robert'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={userData.firstName ?? ''}
+                          onChange={(event) => changeUserData('firstName', event.target.value)}
+                        />
+
+                        <label htmlFor="lastName"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-500'
+                        >Last Name</label>
+                        <input type="lastName" name="lastName" id="lastName"
+                          placeholder='Amoah'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={userData.lastName ?? ''}
+                          onChange={(event) => changeUserData('lastName', event.target.value)}
+                        />
+
+                        <label htmlFor="otherNames"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-500'
+                        >Other Names</label>
+                        <input type="otherNames" name="otherNames" id="otherNames"
+                          placeholder='Paa'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={userData.otherNames ?? ''}
+                          onChange={(event) => changeUserData('otherNames', event.target.value)}
+                        />
+
+                        <div className='w-full flex justify-end'>
+                          <button
+                            type='submit'
+                            className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                              dark:bg-slate-700 dark:text-slate-300'
+                          >submit</button>
+                        </div>
+                      </form>
+                    </div>
+
+                    <div>
+                      <div className='text-center font-bold mb-4'>Change Password</div>
+                      <form 
+                        onSubmit={updateAccountPassword}
+                        className='rounded bg-slate-200 p-3'
+                      >
+                        <label htmlFor="password"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-500 mt-5'
+                        >Password *</label>
+                        <input type="password" name="password" id="password"
+                          placeholder='*************'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 mb-4 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={passwordData.password ?? ''}
+                          onChange={(event) => changePasswordData('password', event.target.value)}
+                        />
+
+                        <label htmlFor="passwordConfirmation"
+                          className='mb-2 font-bold dark:text-slate-800 text-slate-500 mt-5'
+                        >Password Confirmation *</label>
+                        <input type="password" name="passwordConfirmation" id="passwordConfirmation"
+                          placeholder='*************'
+                          className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                          value={passwordData.passwordConfirmation ?? ''}
+                          onChange={(event) => changePasswordData('passwordConfirmation', event.target.value)}
+                        />
+
+                        <div className='w-full flex justify-end'>
+                          <button
+                            type='submit'
+                            className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                              dark:bg-slate-700 dark:text-slate-300'
+                          >submit</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              }
+              
+              {
+                activeSection !== 'Account' &&
+                  <div className='grid grid-cols-2 p-2 my-4 gap-5'>
+                    {
+                      (pages[activeSection].previous > 0) ?
+                        <div 
+                          className='flex justify-end p-2 cursor-pointer'
+                          title={`get previous ${activeSection}`}
+                          onClick={getPreviousItems}
+                          ><ChevronsLeftIcon /></div> :
+                        <div></div>
+                    }
+                    {
+                      (pages[activeSection].next > 0) ?
+                        <div 
+                          className='flex p-2 cursor-pointer'
+                          title={`get next ${activeSection}`}
+                          onClick={getNextItems}
+                        ><ChevronsRightIcon /></div> :
+                        <div></div>
+                    }
+                  </div>
+              }
+            </div> :
+            <div className='w-full min-h-60 flex items-center justify-center text-red-300 font-bold'>Not Authorized</div>
           }
         </div>
       </div>
