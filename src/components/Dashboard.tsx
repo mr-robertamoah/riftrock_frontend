@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X, User, Mail, Contact, Info, Server, PanelTopDashed, ChevronsLeftIcon, ChevronsRightIcon } from 'lucide-react';
 import RiftRockLogo from './RiftRockLogo';
@@ -20,6 +20,9 @@ export default function Dashboard() {
   const dashboardData = useSelector((state) => state.dashboard.value)
   const { getUser } = useGetUser()
   const dispatch = useDispatch()
+  const imageRef = useRef(null)
+  const imgRef = useRef(null)
+  const [imgSrc, setImgSrc] = useState()
   const { formatDate } = useDates()
   const emptyCreateServiceData = {
     title: '',
@@ -56,7 +59,8 @@ export default function Dashboard() {
   const  [loading, setLoading] = useState<boolean>(false);
   const  [createServiceData, setCreateServiceData] = useState<{
     file: File|null, title: string, description: string, id?: number|null,
-    details: string, icon: string, fileDescription: string
+    details: string, icon: string, fileDescription: string,
+    serviceFiles?: Array<{id: number, fileId: string, serviceId: string, file: {id: number, url: string, description: string, name: string}}> 
   }>(emptyCreateServiceData);
   const  [createUserData, setCreateUserData] = useState<{
     email: string, firstName: string, lastName: string, id?: number|null,
@@ -113,6 +117,12 @@ export default function Dashboard() {
     resetUserData()
   }, [user])
 
+  useEffect(() => {
+    if (imgSrc && imgRef.current) {
+      imgRef.current.src = imgSrc;
+    }
+  }, [imgSrc, imgRef.current]);
+
   async function callable() {
     const u = await getUser(user)
 
@@ -123,6 +133,8 @@ export default function Dashboard() {
 
   function createDashboardItem() {
     setShowModal(`Create_${activeSection}`)
+    if (activeSection == 'Services')
+      clearCreateServiceData()
   }
 
   function getUserName(u) {
@@ -617,6 +629,10 @@ export default function Dashboard() {
     setCreateUserData(emptyCreateUserData)
   }
 
+  function clearCreateServiceData() {
+    setCreateServiceData(emptyCreateServiceData)
+  }
+
   function clearDetailData() {
     setDetailData(emptyDetailData)
   }
@@ -642,7 +658,9 @@ export default function Dashboard() {
     })
   }
 
-  async function createServiceFromDashboard() {
+  async function createServiceFromDashboard(event) {
+    event.preventDefault()
+
     if (!createServiceData.title) {
       return showFailureAlert('Title is required.')
     }
@@ -651,15 +669,27 @@ export default function Dashboard() {
       return showFailureAlert('Description is required.')
     }
 
+    const formData = new FormData()
+    formData.append('title', createServiceData.title)
+    formData.append('description', createServiceData.description)
+    formData.append('details', createServiceData.details)
+    formData.append('icon', createServiceData.icon)
+    if (createServiceData.file) {
+      formData.append('file', createServiceData.file)
+      formData.append('fileDescription', createServiceData.fileDescription)
+    }
+
     setLoading(true)
 
-    axios.post('/services', {
-      ...createServiceData
+    axios.post('/services', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     })
     .then((res) => {
       console.log(res);
       dispatch(addService(res.data))
-      clearCreateUserData()
+      clearCreateServiceData()
       setShowModal(null)
     })
     .catch((err) => {
@@ -702,6 +732,14 @@ export default function Dashboard() {
     clearAlert()
     setCreateUserData({
       ...createUserData,
+      [key]: value,
+    })
+  }
+
+  function changeCreateServiceData(key: string, value: string) {
+    clearAlert()
+    setCreateServiceData({
+      ...createServiceData,
       [key]: value,
     })
   }
@@ -762,6 +800,43 @@ export default function Dashboard() {
     delete data.createdAt
     delete data.updatedAt
     setCreateContactData(data)
+  }
+
+  function chooseImage() {
+    imageRef.current.value = ''
+    imageRef.current.click()
+  }
+
+  function removeFile() {
+    imageRef.current.value = ''
+    setCreateServiceData({
+      ...createServiceData,
+      file: null
+    })
+    setImgSrc(null)
+  }
+
+  async function fileSelected() {
+    if (!activeSection.includes('Service')) return
+    const file = imageRef.current?.files?.[0]
+    readFile(file)
+    await setCreateServiceData({
+      ...createServiceData,
+      file
+    })
+
+  }
+
+  function readFile(file) {
+    if (!file) return
+
+    const reader = new FileReader()
+    
+    reader.onload = (async (event) => {
+      setImgSrc(event.target.result)
+    })
+
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -895,7 +970,7 @@ export default function Dashboard() {
         
                           <div className='flex items-center justify-end gap-2'>
                             {
-                              service.details?.length > 0 &&
+                              (service.details?.length > 0 || service.serviceFiles.length) &&
                                 <div 
                                   className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
                                     hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
@@ -1301,7 +1376,137 @@ export default function Dashboard() {
                 </form>
               </div>
           }
+          
+          {/* creating service */}
+          {
+            ['Create_Services', 'Edit_Service'].includes(showModal) &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>{
+                  showModal == 'Create_Services' ? 'Create a Service' : 'Edit Service Information'
+                }</div>
 
+                <form onSubmit={createServiceFromDashboard}>
+
+                  <input name="title" id="title"
+                    placeholder='title'
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={createServiceData.title ?? ''}
+                    onChange={(event) => changeCreateServiceData('title', event.target.value)}
+                  />
+                  <div 
+                    className='text-sm text-blue-600 mb-4'
+                  >This is the title of the service. It is required.</div>
+
+                  <textarea cols={3} name="description" id="description"
+                    placeholder='description'
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={createServiceData.description ?? ''}
+                    onChange={(event) => changeCreateServiceData('description', event.target.value)}
+                  />
+                  <div 
+                    className='text-sm text-blue-600 -mt-1 mb-4'
+                  >Give a short description to the service. It is required.</div>
+
+                  <textarea cols={6} name="details" id="details"
+                    placeholder='details'
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={createServiceData.details ?? ''}
+                    onChange={(event) => changeCreateServiceData('details', event.target.value)}
+                  />
+                  <div 
+                    className='text-sm text-blue-600 -mt-1 mb-4'
+                  >You can give a more detailed description of the service. It is optional.</div>
+
+                  <div 
+                    className={`rounded transition-colors duration-100
+                      w-fit py-1 px-2 cursor-pointer
+                      ${createServiceData.file ? 
+                        'text-blue-800 hover:text-blue-300 bg-blue-500 hover:bg-blue-800' : 
+                        'text-green-800 hover:text-green-300 bg-green-500 hover:bg-green-800'}`}
+                    onClick={chooseImage}
+                  >{createServiceData.file ? 'change file' : 'add file'}</div>
+                  <div 
+                    className='text-sm text-blue-600 mb-4'
+                  >Add an image to show when someone chooses to show details of a service. It is optional.</div>
+
+                  {
+                    imgSrc && (
+                      <div className='rounded p-2 mx-auto bg-slate-700 flex justify-center items-center w-fit relative'>
+                        <img 
+                          className='w-28'
+                          ref={imgRef}
+                          id='service_file'
+                          alt="selected file" />
+                        <div 
+                          className='absolute rounded-full p-1 -top-2 -right-2 w-5 h-5 bg-slate-500 
+                            text-slate-100 cursor-pointer flex justify-center items-center'
+                          onClick={removeFile}
+                        >&times;</div>
+                      </div>
+                    )
+                  }
+                  {
+                    createServiceData.file &&
+                      <input name="fileDescription" id="fileDescription"
+                        placeholder='a description of the file'
+                        className='w-full p-2 rounded mt-2 bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                        value={createServiceData.fileDescription ?? ''}
+                        onChange={(event) => changeCreateServiceData('fileDescription', event.target.value)}
+                      />
+                  }
+                  <input 
+                    hidden 
+                    type="file" 
+                    accept='image/*'
+                    ref={imageRef} 
+                    onChange={fileSelected}
+                  />
+
+                  <div className='w-full flex justify-end'>
+                    <button
+                      type='submit'
+                      className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                        dark:bg-slate-700 dark:text-slate-300'
+                    >submit</button>
+                  </div>
+                </form>
+              </div>
+          }
+          
+          {/* view service */}
+          {
+            'View_Service' == showModal &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'
+                >{createServiceData.title}</div>
+
+                <div className=''>
+                  <div className='text-slate-700 text-center'>Description</div>
+                  <div>{createServiceData.description}</div>
+                  {
+                    createServiceData.serviceFiles?.length &&
+                    <div>
+                      <div className='text-slate-700 text-center mt-4'>Attached file</div>
+                      <div className='flex justify-center w-fit rounded p-2 mx-auto bg-slate-800'>
+                        <img
+                          src={createServiceData.serviceFiles[0].file.url}
+                          alt={createServiceData.title}
+                          className='w-[60%] rounded'
+                        />
+                      </div>
+                    </div>
+                  }
+
+                  {
+                    !!createServiceData.details?.length &&
+                    <div>
+                      <div className='text-slate-700 text-center mt-4'>Details</div>
+                      <div className='mt-3 w-[90%] mx-auto text-justify'>{createServiceData.details}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+          }
           
           {/* updating details */}
           {
