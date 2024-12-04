@@ -59,7 +59,7 @@ export default function Dashboard() {
   const  [loading, setLoading] = useState<boolean>(false);
   const  [createServiceData, setCreateServiceData] = useState<{
     file: File|null, title: string, description: string, id?: number|null,
-    details: string, icon: string, fileDescription: string,
+    details: string, icon: string, fileDescription: string, iconComponent?: React.ReactNode
     serviceFiles?: Array<{id: number, fileId: string, serviceId: string, file: {id: number, url: string, description: string, name: string}}> 
   }>(emptyCreateServiceData);
   const  [createUserData, setCreateUserData] = useState<{
@@ -839,6 +839,14 @@ export default function Dashboard() {
     reader.readAsDataURL(file)
   }
 
+  function getIcon(icon: string | null) {
+    const defaultIcon = Icons.HelpCircle
+
+    if (!icon) return defaultIcon
+
+    return Icons[icon] ?? defaultIcon
+  }
+
   return (
     <div className='text-white overflow-hidden'>
       <div className='bg-slate-600 p-4'>
@@ -975,7 +983,7 @@ export default function Dashboard() {
                                   className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
                                     hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
                                   onClick={() => {
-                                    updateCreateServiceData(service)
+                                    updateCreateServiceData({...service, iconComponent: getIcon(service.icon)})
                                     setShowModal('View_Service')
                                   }}
                                 >view</div>
@@ -1478,7 +1486,12 @@ export default function Dashboard() {
             'View_Service' == showModal &&
               <div className='py-2'>
                 <div className='my-4 text-center font-bold text-slate-600'
-                >{createServiceData.title}</div>
+                >
+                  <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                      <createServiceData.iconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                  </div>
+                  <div>{createServiceData.title}</div>
+                </div>
 
                 <div className=''>
                   <div className='text-slate-700 text-center'>Description</div>
