@@ -58,8 +58,8 @@ export default function Dashboard() {
   }
   const  [loading, setLoading] = useState<boolean>(false);
   const  [createServiceData, setCreateServiceData] = useState<{
-    file: File|null, title: string, description: string, id?: number|null,
-    details: string, icon: string, fileDescription: string, iconComponent?: React.ReactNode
+    url?: string, file: File|null, title: string, description: string, id?: number|null,
+    details: string, icon: string | null, fileDescription: string, iconComponent?: React.ReactNode
     serviceFiles?: Array<{id: number, fileId: string, serviceId: string, file: {id: number, url: string, description: string, name: string}}> 
   }>(emptyCreateServiceData);
   const  [createUserData, setCreateUserData] = useState<{
@@ -105,6 +105,8 @@ export default function Dashboard() {
   type itemType = 'Users' | 'Details' | 'Services' | 'Contacts' | 'Emails'
   type modalActionsType = 'Create_Users' | 'Create_Details' | 'Create_Services' | 
     'Create_Contacts' | 'Create_Emails'
+  const iconNames = Object.keys(Icons)
+  const [iconNamesSubset, setIconNamesSubset] = useState(iconNames.sort(() => Math.random() - 0.5).slice(0, 20))
 
   useEffect(() => {
     clickedSection()
@@ -736,7 +738,7 @@ export default function Dashboard() {
     })
   }
 
-  function changeCreateServiceData(key: string, value: string) {
+  function changeCreateServiceData(key: string, value: string | null) {
     clearAlert()
     setCreateServiceData({
       ...createServiceData,
@@ -785,6 +787,10 @@ export default function Dashboard() {
     const data = {...service}
     delete data.createdAt
     delete data.updatedAt
+    if (service.serviceFiles.length) {
+      data.url = service.serviceFiles[0].files.url
+      setImgSrc(data.url)
+    }
     setCreateServiceData(data)
   }
 
@@ -845,6 +851,10 @@ export default function Dashboard() {
     if (!icon) return defaultIcon
 
     return Icons[icon] ?? defaultIcon
+  }
+
+  function shuffleIconNames() {
+    setIconNamesSubset(iconNames.sort(() => Math.random() - 0.5).slice(0, 20))
   }
 
   return (
@@ -978,7 +988,7 @@ export default function Dashboard() {
         
                           <div className='flex items-center justify-end gap-2'>
                             {
-                              (service.details?.length > 0 || service.serviceFiles.length) &&
+                              (service.details?.length > 0 || service.serviceFiles.length) ?
                                 <div 
                                   className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
                                     hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
@@ -986,7 +996,7 @@ export default function Dashboard() {
                                     updateCreateServiceData({...service, iconComponent: getIcon(service.icon)})
                                     setShowModal('View_Service')
                                   }}
-                                >view</div>
+                                >view</div> : <></>
                               }
                             <div 
                               className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
@@ -1425,17 +1435,64 @@ export default function Dashboard() {
                     className='text-sm text-blue-600 -mt-1 mb-4'
                   >You can give a more detailed description of the service. It is optional.</div>
 
+                  <div className='flex justify-center items-center gap-2 overflow-x-auto pb-3 px-3'>
+                    {
+                      iconNamesSubset.map((iconKey, idx) => {
+                        
+                        const iconName = Icons[iconKey].displayName
+                        const IconComponent = Icons[iconName]
+
+                        if (!IconComponent) {
+                          return null; // Skip rendering if the component is not found
+                        }
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`shrink-0 w-12 h-12 rounded-lg cursor-pointer flex items-center justify-center mb-4 mx-auto
+                              ${createServiceData.icon == iconName ? 
+                                'bg-yellow-700 dark:bg-yellow-500' : 
+                                'bg-slate-500 dark:bg-slate-300'}`}
+                            onClick={() => {
+                              if (createServiceData.icon == iconName) {
+                                changeCreateServiceData('icon', null)
+                                return
+                              }
+                              changeCreateServiceData('icon', iconName)
+                            }}
+                          >
+                            <IconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
                   <div 
-                    className={`rounded transition-colors duration-100
-                      w-fit py-1 px-2 cursor-pointer
-                      ${createServiceData.file ? 
-                        'text-blue-800 hover:text-blue-300 bg-blue-500 hover:bg-blue-800' : 
-                        'text-green-800 hover:text-green-300 bg-green-500 hover:bg-green-800'}`}
-                    onClick={chooseImage}
-                  >{createServiceData.file ? 'change file' : 'add file'}</div>
+                    className='text-sm text-blue-600 -mt-1 mb-4'
+                  >Select an appropriate icon for the service. It will be shown on a service's badge. It is required.</div>
                   <div 
-                    className='text-sm text-blue-600 mb-4'
-                  >Add an image to show when someone chooses to show details of a service. It is optional.</div>
+                    className='text-sm text-slate-700 p-2 w-fit ml-auto cursor-pointer
+                      hover:bg-slate-700 hover:text-slate-300 transition duration-100 rounded'
+                    onClick={shuffleIconNames}
+                  >get other icons</div>
+                  
+                  {
+                    showModal == 'Create_Services' ?
+                      <div>
+                        <div 
+                          className={`rounded transition-colors duration-100
+                            w-fit py-1 px-2 cursor-pointer
+                            ${createServiceData.file ? 
+                              'text-blue-800 hover:text-blue-300 bg-blue-500 hover:bg-blue-800' : 
+                              'text-green-800 hover:text-green-300 bg-green-500 hover:bg-green-800'}`}
+                          onClick={chooseImage}
+                        >{createServiceData.file ? 'change file' : 'add file'}</div>
+                        <div 
+                          className='text-sm text-blue-600 mb-4'
+                        >Add an image to show when someone chooses to show details of a service. It is optional.</div>
+                      </div> :
+                      <div>
+                      </div>
+                  }
 
                   {
                     imgSrc && (
