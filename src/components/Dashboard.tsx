@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, deleteUser, addContacts, deleteContact, updateContact, addDetails, updateDetail } from '../redux/slices/dashboard';
+import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, deleteUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 import * as Icons from 'lucide-react';
@@ -583,6 +583,26 @@ export default function Dashboard() {
       dispatch(updateDetail(res.data))
       setShowModal(null)
       clearDetailData()
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function deleteServiceFromDashboard() {
+    if (!createServiceData) return
+
+    setLoading(true)
+
+    axios.delete(`/services/${createServiceData.id}`)
+    .then((res) => {
+      console.log(res);
+      dispatch(deleteService(createServiceData))
+      setShowModal(null)
     })
     .catch((err) => {
       console.log(err);
@@ -1419,6 +1439,32 @@ export default function Dashboard() {
                         hover:bg-red-700 hover:text-red-300 transition duration-100'
 
                       onClick={deleteContactFromDashboard}
+                    >delete</button>
+                  </div>
+                </div>
+              </div>
+          }
+          
+          {/* deleting service */}
+          {
+            'Delete_Service' == showModal &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Deleting Service</div>
+
+                <div >
+                  <div>Are you sure you want to the service?</div>
+                  <div className='w-full flex justify-center items-center gap-4'>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-blue-300 text-blue-700
+                        hover:bg-blue-700 hover:text-blue-300 transition duration-100'
+
+                      onClick={() => setShowModal(null)}
+                    >cancel</button>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-red-300 text-red-700
+                        hover:bg-red-700 hover:text-red-300 transition duration-100'
+
+                      onClick={deleteServiceFromDashboard}
                     >delete</button>
                   </div>
                 </div>

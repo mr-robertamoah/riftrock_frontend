@@ -21,6 +21,19 @@ const dashboardSlice = createSlice({
         addServices(state, data) {
             state.value.services = [...data.payload]
         },
+        updateService(state, data) {
+            state.value.services.splice(
+                state.value.services.findIndex(service => service.id == data.payload.id),
+                1,
+                data.payload
+            )
+        },
+        deleteService(state, data) {
+            state.value.services.splice(
+                state.value.services.findIndex(service => service.id == data.payload.id),
+                1,
+            )
+        },
         addUser(state, data) {
             const user = state.value.users.find((user) => user.id == data.payload.id)
 
@@ -85,5 +98,7 @@ export const {
     deleteContact,
     addDetails,
     updateDetail,
+    updateService,
+    deleteService,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
