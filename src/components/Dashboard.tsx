@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, deleteUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService } from '../redux/slices/dashboard';
+import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 import * as Icons from 'lucide-react';
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const dispatch = useDispatch()
   const imageRef = useRef(null)
   const imgRef = useRef(null)
-  const [imgSrc, setImgSrc] = useState()
+  const [imgSrc, setImgSrc] = useState<string|null>(null)
   const { formatDate } = useDates()
   const emptyCreateServiceData = {
     title: '',
@@ -59,8 +59,12 @@ export default function Dashboard() {
   const  [loading, setLoading] = useState<boolean>(false);
   const  [createServiceData, setCreateServiceData] = useState<{
     url?: string, file: File|null, title: string, description: string, id?: number|null,
-    details: string, icon: string | null, fileDescription: string, iconComponent?: React.ReactNode
-    serviceFiles?: Array<{id: number, fileId: string, serviceId: string, file: {id: number, url: string, description: string, name: string}}> 
+    details: string, icon: string | null, fileDescription: string,
+    iconComponent?: React.ReactNode, deletedFileId?: number | null, 
+    serviceFiles?: Array<{
+      id: number, fileId: string, serviceId: string, 
+      file: {id: number, url: string, description: string, name: string
+    }}>
   }>(emptyCreateServiceData);
   const  [createUserData, setCreateUserData] = useState<{
     email: string, firstName: string, lastName: string, id?: number|null,
@@ -632,6 +636,9 @@ export default function Dashboard() {
   }
 
   function clearCreateServiceData() {
+    if (imgRef.current)
+      imgRef.current.src = ''
+    setImgSrc(null)
     setCreateServiceData(emptyCreateServiceData)
   }
 
@@ -660,9 +667,7 @@ export default function Dashboard() {
     })
   }
 
-  async function createServiceFromDashboard(event) {
-    event.preventDefault()
-
+  async function createServiceFromDashboard() {
     if (!createServiceData.title) {
       return showFailureAlert('Title is required.')
     }
@@ -701,6 +706,69 @@ export default function Dashboard() {
     .finally(() => {
       setLoading(false)
     })
+  }
+
+  async function updateServiceFromDashboard() {
+    const oldService = dashboardData.services.find((service) => service.id == createServiceData.id)
+
+    if (
+      createServiceData.title == oldService.title &&
+      createServiceData.description == oldService.description &&
+      createServiceData.details == oldService.details &&
+      createServiceData.icon == oldService.icon &&
+      !createServiceData.file &&
+      !createServiceData.deletedFileId
+    ) {
+      return showFailureAlert('No changes have been made to the service.')
+    }
+
+    const formData = new FormData()
+    if (createServiceData.title !== oldService.title)
+      formData.append('title', createServiceData.title)
+    if (createServiceData.description !== oldService.description)
+      formData.append('description', createServiceData.description)
+    if (createServiceData.details && createServiceData.details !== oldService.details)
+      formData.append('details', createServiceData.details)
+    if (createServiceData.icon && createServiceData.icon !== oldService.icon)
+      formData.append('icon', createServiceData.icon)
+    if (createServiceData.deletedFileId)
+      formData.append('deletedFileId', createServiceData.deletedFileId.toString())
+    if (createServiceData.file) {
+      formData.append('file', createServiceData.file)
+      formData.append('fileDescription', createServiceData.fileDescription)
+    }
+
+    setLoading(true)
+
+    axios.patch(`/services/${oldService.id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    .then((res) => {
+      console.log(res);
+      dispatch(updateService(res.data))
+      clearCreateServiceData()
+      setShowModal(null)
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  function createOrUpdateService(event) {
+    event.preventDefault()
+
+    if (showModal == 'Create_Services') {
+      createServiceFromDashboard()
+      return
+    }
+
+    updateServiceFromDashboard()
   }
 
   async function makeUserAdmin(u) {
@@ -787,9 +855,11 @@ export default function Dashboard() {
     const data = {...service}
     delete data.createdAt
     delete data.updatedAt
-    if (service.serviceFiles.length) {
-      data.url = service.serviceFiles[0].files.url
+    if (service.serviceFiles.length && showModal == 'Create_Services') {
+      data.url = service.serviceFiles[0].file?.url
       setImgSrc(data.url)
+      if (imgRef.current)
+        imgRef.current.src = data.url
     }
     setCreateServiceData(data)
   }
@@ -851,6 +921,18 @@ export default function Dashboard() {
     if (!icon) return defaultIcon
 
     return Icons[icon] ?? defaultIcon
+  }
+
+  function removeOrKeepServiceFile() {
+    let deletedFileId = createServiceData.deletedFileId
+
+    if (deletedFileId) deletedFileId = null
+    else deletedFileId = createServiceData.serviceFiles?.[0]?.file?.id
+
+    setCreateServiceData({
+      ...createServiceData,
+      deletedFileId
+    })
   }
 
   function shuffleIconNames() {
@@ -1002,7 +1084,7 @@ export default function Dashboard() {
                               className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
                                 hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
                               onClick={() => {
-                                updateCreateServiceData(service)
+                                updateCreateServiceData({...service, iconComponent: getIcon(service.icon)})
                                 setShowModal('Edit_Service')
                               }}
                             >edit</div>
@@ -1279,6 +1361,7 @@ export default function Dashboard() {
                 </div>
               }
               
+              {/* pagination */}
               {
                 activeSection !== 'Account' &&
                   <div className='grid grid-cols-2 p-2 my-4 gap-5'>
@@ -1403,7 +1486,7 @@ export default function Dashboard() {
                   showModal == 'Create_Services' ? 'Create a Service' : 'Edit Service Information'
                 }</div>
 
-                <form onSubmit={createServiceFromDashboard}>
+                <form onSubmit={createOrUpdateService}>
 
                   <input name="title" id="title"
                     placeholder='title'
@@ -1435,6 +1518,15 @@ export default function Dashboard() {
                     className='text-sm text-blue-600 -mt-1 mb-4'
                   >You can give a more detailed description of the service. It is optional.</div>
 
+                  {
+                    createServiceData.iconComponent ?
+                      <div>
+                        <div className='text-xs text-center text-slate-500'>current icon</div>
+                        <div className="w-12 h-12 bg-yellow-700 dark:bg-yellow-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                          <createServiceData.iconComponent className="w-6 h-6 dark:text-slate-900 text-slate-400" />
+                        </div>
+                      </div> : <></>
+                  }
                   <div className='flex justify-center items-center gap-2 overflow-x-auto pb-3 px-3'>
                     {
                       iconNamesSubset.map((iconKey, idx) => {
@@ -1475,27 +1567,61 @@ export default function Dashboard() {
                     onClick={shuffleIconNames}
                   >get other icons</div>
                   
+                  <div>
+                    <div 
+                      className={`rounded transition-colors duration-100
+                        w-fit py-1 px-2 cursor-pointer
+                        ${createServiceData.file ? 
+                          'text-blue-800 hover:text-blue-300 bg-blue-500 hover:bg-blue-800' : 
+                          'text-green-800 hover:text-green-300 bg-green-500 hover:bg-green-800'}`}
+                      onClick={chooseImage}
+                    >{createServiceData.file ? 'change file' : 'add file'}</div>
+                    <div 
+                      className='text-sm text-blue-600 mb-4'
+                    >Add an image to show when someone chooses to show details of a service. It is optional.</div>
+                  </div>
                   {
-                    showModal == 'Create_Services' ?
+                    showModal == 'Edit_Service' &&
                       <div>
-                        <div 
-                          className={`rounded transition-colors duration-100
-                            w-fit py-1 px-2 cursor-pointer
-                            ${createServiceData.file ? 
-                              'text-blue-800 hover:text-blue-300 bg-blue-500 hover:bg-blue-800' : 
-                              'text-green-800 hover:text-green-300 bg-green-500 hover:bg-green-800'}`}
-                          onClick={chooseImage}
-                        >{createServiceData.file ? 'change file' : 'add file'}</div>
-                        <div 
-                          className='text-sm text-blue-600 mb-4'
-                        >Add an image to show when someone chooses to show details of a service. It is optional.</div>
-                      </div> :
-                      <div>
+                        {
+                          createServiceData.serviceFiles?.[0]?.file?.url ? 
+                            <div
+                              className={`rounded p-2 mx-auto flex justify-center items-center w-fit relative
+                                ${createServiceData.deletedFileId ? 'bg-red-700' : 'bg-slate-700'}`}
+                            >
+                              <img 
+                                src={createServiceData.serviceFiles[0].file.url}
+                                className=''
+                              />
+                              <div 
+                                className='absolute rounded-full p-1 -top-2 -right-2 w-5 h-5 bg-slate-500 
+                                  text-slate-100 cursor-pointer flex justify-center items-center'
+                                onClick={removeOrKeepServiceFile}
+                                title={`${createServiceData.deletedFileId ? 'keep current file' : 'remove current file'}`}
+                              >&times;</div>
+                            </div> :
+                            <div className='text-sm text-slate-600'>No file for service</div>
+                        }
+
+                        {
+                          (createServiceData.deletedFileId && createServiceData.serviceFiles?.[0]?.file?.url) &&
+                          <div className='text-sm text-slate-600 mt-2'>The service's file will be deleted.</div>
+                        }
+
+                        {
+                          (createServiceData.file && !createServiceData.serviceFiles?.[0]?.file?.url) &&
+                          <div className='text-sm text-slate-600 mb-4'>A new file will be added to the service.</div>
+                        }
+
+                        {
+                          (createServiceData.file && createServiceData.serviceFiles?.[0]?.file?.url) &&
+                          <div className='text-sm text-slate-600 mb-4'>The new file will replace the service's current file.</div>
+                        }
                       </div>
                   }
 
                   {
-                    imgSrc && (
+                    (imgSrc) && (
                       <div className='rounded p-2 mx-auto bg-slate-700 flex justify-center items-center w-fit relative'>
                         <img 
                           className='w-28'
@@ -1554,7 +1680,7 @@ export default function Dashboard() {
                   <div className='text-slate-700 text-center'>Description</div>
                   <div>{createServiceData.description}</div>
                   {
-                    createServiceData.serviceFiles?.length &&
+                    createServiceData.serviceFiles?.length ?
                     <div>
                       <div className='text-slate-700 text-center mt-4'>Attached file</div>
                       <div className='flex justify-center w-fit rounded p-2 mx-auto bg-slate-800'>
@@ -1564,7 +1690,9 @@ export default function Dashboard() {
                           className='w-[60%] rounded'
                         />
                       </div>
-                    </div>
+                      <div className='text-xs text-slate-500 text-center'
+                      >{createServiceData.serviceFiles[0].file.description}</div>
+                    </div> : <></>
                   }
 
                   {
