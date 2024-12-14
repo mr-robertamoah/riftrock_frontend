@@ -6,14 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService } from '../redux/slices/dashboard';
+import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService, addEmails } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 import * as Icons from 'lucide-react';
 
 export default function Dashboard() {
   const [fullSideBar, setFullSideBar] = useState(false)
-  const [activeSection, setActiveSection] = useState('Services')
+  const [activeSection, setActiveSection] = useState('Account')
   const [showModal, setShowModal] = useState<string | null>(null)
   const navigator = useNavigate()
   const user = useSelector((state) => state.auth.value)
@@ -88,11 +88,11 @@ export default function Dashboard() {
     otherNames: string,
   }>(emptyUserData);
   const [pages, setPages] = useState({
-    'Services': {next: 0, current: 0, previous: 0},
-    'Emails': {next: 0, current: 0, previous: 0},
-    'Contacts': {next: 0, current: 0, previous: 0},
-    'Users': {next: 0, current: 0, previous: 0},
-    'Details': {next: 0, current: 0, previous: 0},
+    'Services': {next: 1, current: 0, previous: 0, page: 0, lastPage: 0},
+    'Emails': {next: 1, current: 0, previous: 0, page: 0, lastPage: 0},
+    'Contacts': {next: 1, current: 0, previous: 0, page: 0, lastPage: 0},
+    'Users': {next: 1, current: 0, previous: 0, page: 0, lastPage: 0},
+    'Details': {next: 1, current: 0, previous: 0, page: 0, lastPage: 0},
   })
   const sections = [
     {name: 'Users', icon: User},
@@ -106,6 +106,7 @@ export default function Dashboard() {
     type: '',
   }
   const  [alert, setAlert] = useState<{message: string, type: string}>(emptyAlert);
+  const  [sectionData, setSectionData] = useState([]);
   type itemType = 'Users' | 'Details' | 'Services' | 'Contacts' | 'Emails'
   type modalActionsType = 'Create_Users' | 'Create_Details' | 'Create_Services' | 
     'Create_Contacts' | 'Create_Emails'
@@ -113,11 +114,18 @@ export default function Dashboard() {
   const [iconNamesSubset, setIconNamesSubset] = useState(iconNames.sort(() => Math.random() - 0.5).slice(0, 20))
 
   useEffect(() => {
-    clickedSection()
     if (user) return
+
+    if (!dashboardData.services.length)
+      clickedSection()
 
     callable()
   }, [])
+
+  useEffect(() => {
+    if (activeSection == 'Services')
+      updateSectionData('Services')
+  }, [dashboardData.services, pages.Services.current])
 
   useEffect(() => {
     resetUserData()
@@ -203,20 +211,50 @@ export default function Dashboard() {
       getUsers()
     }
     
+    if (section == 'Emails' && !dashboardData.emails.length) {
+      initiatePageField('Emails')
+
+      getEmails()
+    }
+    
     if (section == 'Details' && !dashboardData.details.length)
       getDetails()
   }
 
   async function getServices() {
-    if (!pages.Services.current)
+    // TODO updated the various get functions to prevent running when the conditions below are met
+    // TODO add useEffects for the various sections to update their data when new data is added or removed
+    if (
+      !pages.Services.next || 
+      (pages.Services.lastPage && pages.Services.page == pages.Services.lastPage)
+    )
       return
 
-    axios.get(`/services?page${pages.Services.current}`)
+    axios.get(`/services?page=${pages.Services.next}`)
     .then((res) => {
       console.log(res);
       setPagesUsingMeta(res.data.meta, 'Services')
 
       dispatch(addServices(res.data.data))
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+
+    })
+  }
+
+  async function getEmails() {
+    if (!pages.Emails.current)
+      return
+
+    axios.get(`/emails?page${pages.Emails.next}`)
+    .then((res) => {
+      console.log(res);
+      setPagesUsingMeta(res.data.meta, 'Emails')
+
+      dispatch(addEmails(res.data.data))
     })
     .catch((err) => {
       console.log(err);
@@ -290,13 +328,16 @@ export default function Dashboard() {
     },
     item: itemType,
   ) {
-    const data = {next: 0, current: 0, previous: 0}
+    const data = {next: 0, current: 0, previous: 0, lastPage: 0, page: 0}
 
+    data.lastPage = meta.lastPage
     data.previous = meta.page - 1
+    data.current = meta.page
+    data.page = meta.page
     if (meta.page + 1 <= meta.lastPage)
       data.next = meta.page + 1
     else
-      data.next = 0
+      data.next = 1
 
     setPages(() => {
       return {
@@ -304,6 +345,16 @@ export default function Dashboard() {
         [item]: data
       }
     })
+  }
+
+  function updateSectionData(activeItem: string) {
+    const data = dashboardData[activeItem.toLowerCase()]
+      .slice(
+        (pages[activeItem].current * 10) - 10, 
+        (pages[activeItem].current + 1) * 10 - 10
+      )
+    
+    setSectionData(data)
   }
 
   function increasePageCurrent(item: itemType) {
@@ -361,15 +412,16 @@ export default function Dashboard() {
   }
 
   function getNextItems() {
-    increasePageCurrent(activeSection)
+    increasePageCurrent(activeSection as itemType)
+    increasePageField(activeSection as itemType, 'previous')
 
     getItems()
   }
 
   function getPreviousItems() {
-    decreasePageCurrent(activeSection)
-
-    getItems()
+    decreasePageCurrent(activeSection as itemType)
+    decreasePageField(activeSection as itemType, 'previous')
+    increasePageField(activeSection as itemType, 'next')
   }
 
   function handleCloseModal(event) {
@@ -1055,7 +1107,7 @@ export default function Dashboard() {
                   <div
                     className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
                     {
-                      dashboardData.services.map((service) => {
+                      sectionData.map((service) => {
                         const IconComponent = Icons[service.icon] ?? Icons.HelpCircle
 
                         return <div key={service.id} 
@@ -1375,7 +1427,7 @@ export default function Dashboard() {
                         <div></div>
                     }
                     {
-                      (pages[activeSection].next > 0) ?
+                      (pages[activeSection].current < pages[activeSection].lastPage) ?
                         <div 
                           className='flex p-2 cursor-pointer'
                           title={`get next ${activeSection}`}

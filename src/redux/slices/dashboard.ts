@@ -8,6 +8,7 @@ const dashboardSlice = createSlice({
             details: [],
             services: [],
             users: [],
+            emails: [],
         }
     },
     reducers: {
@@ -19,7 +20,7 @@ const dashboardSlice = createSlice({
             state.value.services.unshift(data.payload)
         },
         addServices(state, data) {
-            state.value.services = [...data.payload]
+            state.value.services = [...state.value.services, ...data.payload]
         },
         updateService(state, data) {
             state.value.services.splice(
@@ -42,7 +43,7 @@ const dashboardSlice = createSlice({
             state.value.users.unshift(data.payload)
         },
         addUsers(state, data) {
-            state.value.users = [...data.payload]
+            state.value.users = [...state.value.users, ...data.payload]
         },
         updateUser(state, data) {
             state.value.users.splice(
@@ -58,7 +59,7 @@ const dashboardSlice = createSlice({
             )
         },
         addContacts(state, data) {
-            state.value.contacts = [...data.payload]
+            state.value.contacts = [...state.value.contacts, ...data.payload]
         },
         updateContact(state, data) {
             state.value.contacts.splice(
@@ -83,6 +84,16 @@ const dashboardSlice = createSlice({
                 data.payload
             )
         },
+        addEmails(state, data) {
+            state.value.emails = [...state.value.emails, ...data.payload]
+        },
+        updateEmail(state, data) {
+            state.value.emails.splice(
+                state.value.emails.findIndex(email => email.id == data.payload.id),
+                1,
+                data.payload
+            )
+        },
     }
 })
 
@@ -100,5 +111,7 @@ export const {
     updateDetail,
     updateService,
     deleteService,
+    addEmails,
+    updateEmail,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
