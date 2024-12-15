@@ -94,6 +94,12 @@ const dashboardSlice = createSlice({
                 data.payload
             )
         },
+        deleteEmail(state, data) {
+            state.value.emails.splice(
+                state.value.emails.findIndex(email => email.id == data.payload.id),
+                1,
+            )
+        },
     }
 })
 
@@ -113,5 +119,6 @@ export const {
     deleteService,
     addEmails,
     updateEmail,
+    deleteEmail,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService, addEmails, updateEmail } from '../redux/slices/dashboard';
+import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService, addEmails, updateEmail, deleteEmail } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 import * as Icons from 'lucide-react';
@@ -722,6 +722,26 @@ export default function Dashboard() {
     .then((res) => {
       console.log(res);
       dispatch(updateEmail(res.data))
+      setShowModal(null)
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function deleteEmailFromDashboard() {
+    if (!createEmailData) return
+
+    setLoading(true)
+
+    axios.delete(`/emails/${createEmailData.id}`)
+    .then((res) => {
+      console.log(res);
+      dispatch(deleteEmail(createEmailData))
       setShowModal(null)
     })
     .catch((err) => {
@@ -2119,6 +2139,32 @@ export default function Dashboard() {
 
                       onClick={markEmailFromDashboard}
                     >continue</button>
+                  </div>
+                </div>
+              </div>
+          }
+          
+          {/* deleting email */}
+          {
+            'Delete_Email' == showModal &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Deleting Email</div>
+
+                <div >
+                  <div>Are you sure you want to the email?</div>
+                  <div className='w-full flex justify-center items-center gap-4'>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-blue-300 text-blue-700
+                        hover:bg-blue-700 hover:text-blue-300 transition duration-100'
+
+                      onClick={() => setShowModal(null)}
+                    >cancel</button>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-red-300 text-red-700
+                        hover:bg-red-700 hover:text-red-300 transition duration-100'
+
+                      onClick={deleteEmailFromDashboard}
+                    >delete</button>
                   </div>
                 </div>
               </div>
