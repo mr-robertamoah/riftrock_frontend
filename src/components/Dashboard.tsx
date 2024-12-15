@@ -48,6 +48,10 @@ export default function Dashboard() {
   const emptyContactData = {
     email: '', name: '', message: '',
   }
+  const emptyEmailData = {
+    sender: '', recipient: '', subject: '',
+    body: '', id: 0
+  }
   const emptyPasswordData = {
     password: '', 
     passwordConfirmation: '',
@@ -73,6 +77,9 @@ export default function Dashboard() {
   const  [createContactData, setCreateContactData] = useState<{
     email: string, name: string, message: string, id?: number
   } | null>(emptyContactData);
+  const  [createEmailData, setCreateEmailData] = useState<{
+    sender: string, recipient: string, body: string, subject: string, id?: number|null
+  } | null>(emptyEmailData);
   const  [detailData, setDetailData] = useState<{
     key: string, 
     info?: string, 
@@ -126,6 +133,21 @@ export default function Dashboard() {
     if (activeSection == 'Services')
       updateSectionData('Services')
   }, [dashboardData.services, pages.Services.current])
+
+  useEffect(() => {
+    if (activeSection == 'Users')
+      updateSectionData('Users')
+  }, [dashboardData.users, pages.Users.current])
+
+  useEffect(() => {
+    if (activeSection == 'Emails')
+      updateSectionData('Emails')
+  }, [dashboardData.emails, pages.Emails.current])
+
+  useEffect(() => {
+    if (activeSection == 'Contacts')
+      updateSectionData('Contacts')
+  }, [dashboardData.contacts, pages.Contacts.current])
 
   useEffect(() => {
     resetUserData()
@@ -222,8 +244,6 @@ export default function Dashboard() {
   }
 
   async function getServices() {
-    // TODO updated the various get functions to prevent running when the conditions below are met
-    // TODO add useEffects for the various sections to update their data when new data is added or removed
     if (
       !pages.Services.next || 
       (pages.Services.lastPage && pages.Services.page == pages.Services.lastPage)
@@ -246,7 +266,10 @@ export default function Dashboard() {
   }
 
   async function getEmails() {
-    if (!pages.Emails.current)
+    if (
+      !pages.Emails.next || 
+      (pages.Emails.lastPage && pages.Emails.page == pages.Emails.lastPage)
+    )
       return
 
     axios.get(`/emails?page${pages.Emails.next}`)
@@ -265,10 +288,13 @@ export default function Dashboard() {
   }
 
   async function getContacts() {
-    if (!pages.Contacts.current)
+    if (
+      !pages.Contacts.next || 
+      (pages.Contacts.lastPage && pages.Contacts.page == pages.Contacts.lastPage)
+    )
       return
 
-    axios.get(`/contacts?page${pages.Contacts.current}`)
+    axios.get(`/contacts?page${pages.Contacts.next}`)
     .then((res) => {
       console.log(res);
       setPagesUsingMeta(res.data.meta, 'Contacts')
@@ -284,10 +310,13 @@ export default function Dashboard() {
   }
 
   async function getUsers() {
-    if (!pages.Users.current)
+    if (
+      !pages.Users.next || 
+      (pages.Users.lastPage && pages.Users.page == pages.Users.lastPage)
+    )
       return
     
-    axios.get(`/users?page${pages.Users.current}`)
+    axios.get(`/users?page${pages.Users.next}`)
     .then((res) => {
       console.log(res);
       setPagesUsingMeta(res.data.meta, 'Users')
@@ -930,6 +959,13 @@ export default function Dashboard() {
     setCreateContactData(data)
   }
 
+  function updateCreateEmailData(email) {
+    const data = {...email}
+    delete data.createdAt
+    delete data.updatedAt
+    setCreateEmailData(data)
+  }
+
   function chooseImage() {
     imageRef.current.value = ''
     imageRef.current.click()
@@ -1160,6 +1196,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               }
+
               {/* contacts */}
               {
                 activeSection == 'Contacts' &&
@@ -1167,7 +1204,7 @@ export default function Dashboard() {
                   <div
                     className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
                     {
-                      dashboardData.contacts.map((contact) => (
+                      sectionData.map((contact) => (
                         <div key={contact.id} 
                           className={`rounded h-fit ${contact.seen ? 'bg-green-300' : 'bg-slate-300'} shadow-md shadow-yellow-700 text-slate-700 p-2
                             `}>
@@ -1209,6 +1246,72 @@ export default function Dashboard() {
                 </div>
               }
 
+              {/* emails */}
+              {
+                activeSection == 'Emails' &&
+                <div>
+                  <div
+                    className='p-6 gap-3 grid grid-cols-1 sm:w-[90%] md:w-[80%] lg:w-[70%] mx-auto'>
+                    {
+                      sectionData.map((email) => (
+                        <div key={email.id} 
+                          className={`rounded h-fit ${email.read ? 'bg-slate-500' : 'bg-slate-300'} shadow-md shadow-yellow-700 text-slate-700 p-2
+                            `}>
+                          <div></div>
+                          <div className='flex justify-between items-center'>
+                            <div className='text-center font-bold'>{email.sender}</div>
+                            <div className='flex items-center justify-end gap-2'>
+                              <div 
+                                className='bg-blue-700 text-blue-300 w-fit py-1 px-2 rounded cursor-pointer
+                                  hover:bg-blue-800 hover:text-blue-200 transition-colors duration-100'
+                                onClick={() => {
+                                  updateCreateEmailData(email)
+                                  setShowModal('View_Email')
+                                }}
+                              >view</div>
+                              {
+                                !email.read &&
+                                  <div 
+                                    className='bg-green-700 text-green-300 w-fit py-1 px-2 rounded cursor-pointer
+                                      hover:bg-green-800 hover:text-green-200 transition-colors duration-100'
+                                    onClick={() => {
+                                      updateCreateEmailData(email)
+                                      setShowModal('Mark_Email')
+                                    }}
+                                  >mark as read</div>
+                              }
+                              <div 
+                                className='bg-red-700 text-red-300 w-fit py-1 px-2 rounded cursor-pointer
+                                  hover:bg-red-800 hover:text-red-200 transition-colors duration-100'
+                                onClick={() => {
+                                  updateCreateEmailData(email)
+                                  setShowModal('Delete_Email')
+                                }}
+                              >delete</div>
+                            </div>
+                          </div>
+                          <div className='mt-3 mb-2 px-2'>
+                            {
+                              email.subject?.length ? 
+                                `${email.subject.slice(0, 100)}${email.subject?.length > 100 ? '...' : ''}` : 
+                                'no subject'
+                            }
+                          </div>
+                          <div className='text-sm text-slate-500 text-right mb-4'>{formatDate(email.createdAt)}</div>
+        
+                          
+                        </div> 
+                      ))
+                    }
+        
+                    {
+                      dashboardData.emails.length === 0 && <div className='col-span-3 text-center text-lg text-slate-700'
+                      >No emails available</div>
+                    }
+                  </div>
+                </div>
+              }
+
               {/* users */}
               {
                 activeSection == 'Users' &&
@@ -1216,7 +1319,7 @@ export default function Dashboard() {
                   <div
                     className='p-6 gap-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
                     {
-                      dashboardData.users.map((u) => (
+                      sectionData.map((u) => (
                         <div key={u.id} 
                           className='rounded h-fit bg-slate-300 shadow-md shadow-yellow-700 text-slate-700 p-2
                             '>
@@ -1415,7 +1518,7 @@ export default function Dashboard() {
               
               {/* pagination */}
               {
-                activeSection !== 'Account' &&
+                !['Account', 'Details'].includes(activeSection) &&
                   <div className='grid grid-cols-2 p-2 my-4 gap-5'>
                     {
                       (pages[activeSection].previous > 0) ?
@@ -1948,6 +2051,28 @@ export default function Dashboard() {
                       onClick={markContactFromDashboard}
                     >continue</button>
                   </div>
+                </div>
+              </div>
+          }
+          
+          {/* view email */}
+          {
+            'View_Email' == showModal &&
+              <div className='py-2 min-h-96'>
+                <div className='my-4 font-bold text-slate-600'
+                >
+                  <div>From: <span className='font-normal'>{createEmailData?.sender}</span></div>
+                  <div className='mt-4'>To: <span className='font-normal'>{createEmailData?.recipient}</span></div>
+                </div>
+
+                <hr />
+                <div className='mt-6'>
+                  <div className='text-slate-700 font-bold'>
+                    Subject: <span className='font-normal'>{createEmailData?.subject?.length ? createEmailData.subject : 'no subject'}</span>
+                  </div>
+                  <hr className='mt-3' />
+                  <div className='text-slate-700 text-center font-bold mt-6'>Body</div>
+                  <div className='mx-auto w-[80%] text-sm'>{createEmailData?.body?.length ? createEmailData.body : 'no body'}</div>
                 </div>
               </div>
           }
