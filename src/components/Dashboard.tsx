@@ -1,12 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, User, Mail, Contact, Info, Server, PanelTopDashed, ChevronsLeftIcon, ChevronsRightIcon } from 'lucide-react';
+import { 
+  Plus, Menu, X, User, Mail, Contact, Info, Server, PanelTopDashed, 
+  ChevronsLeftIcon, ChevronsRightIcon 
+} from 'lucide-react';
 import RiftRockLogo from './RiftRockLogo';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService, addEmails, updateEmail, deleteEmail } from '../redux/slices/dashboard';
+import { 
+  addServices, addUsers, addUser as addDashboardUser, addService, 
+  updateUser, addContacts, deleteContact, updateContact, addDetails, 
+  updateDetail, deleteService, updateService, addEmails, updateEmail, 
+  deleteEmail 
+} from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 import * as Icons from 'lucide-react';
@@ -712,6 +720,58 @@ export default function Dashboard() {
     })
   }
 
+  async function createEmailFromDashboard(event) {
+    event.preventDefault()
+
+    // TODO implement adding attachments
+    // TODO Verify this part with client and if agreed, implement it on the backend
+    if (!user.role.toLowerCase().includes('admin'))
+      return showFailureAlert('You must be an administrator to send emails.')
+
+    if (!createEmailData?.recipient) {
+      return showFailureAlert('A recipient is required for an email.')
+    }
+    
+    if (!createEmailData?.subject) {
+      return showFailureAlert('Subject is required.')
+    }
+    
+    if (!createEmailData?.body) {
+      return showFailureAlert('Body is required.')
+    }
+
+    let sender = 'admin@riftrock.org'
+    if (user.email == 'danso883@gmail.com')
+      sender = 'danso883@riftrock.org'
+
+    setLoading(true)
+
+    const data = {
+      ...createEmailData
+    }
+
+    delete data.recipient
+    data['recepient'] = createEmailData.recipient
+
+    axios.post('/emails', {
+      ...data,
+      sender
+    })
+    .then((res) => {
+      console.log(res);
+      setShowModal(null)
+      clearCreateEmailData()
+      showSuccessAlert('Email was successfully sent.')
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
   async function markEmailFromDashboard(event) {
     event.preventDefault()
     if (!createEmailData?.id) return
@@ -755,6 +815,10 @@ export default function Dashboard() {
 
   function clearCreateUserData() {
     setCreateUserData(emptyCreateUserData)
+  }
+
+  function clearCreateEmailData() {
+    setCreateEmailData(emptyEmailData)
   }
 
   function clearCreateServiceData() {
@@ -948,6 +1012,16 @@ export default function Dashboard() {
     clearAlert()
     setPasswordData({
       ...passwordData,
+      [key]: value,
+    })
+  }
+
+  function changeCreateEmailData(key: string, value: string) {
+    clearAlert()
+    if (!createEmailData) return
+
+    setCreateEmailData({
+      ...createEmailData,
       [key]: value,
     })
   }
@@ -1170,11 +1244,13 @@ export default function Dashboard() {
             user ?
             <div>
               {
-                !['Contacts', 'Emails', 'Details', 'Account'].includes(activeSection) &&
-                  <div className='absolute top-2 right-4 p-2'>
-                    <button className='rounded py-1 px-2 bg-teal-700'
+                !['Contacts', 'Details', 'Account'].includes(activeSection) &&
+                  <div 
+                    className="w-12 h-12 cursor-pointer bg-yellow-700 dark:bg-yellow-500 
+                      rounded-lg flex items-center justify-center mb-2 ml-auto mr-2"
                     onClick={createDashboardItem}
-                    >create</button>
+                  >
+                    <Plus className="w-6 h-6 dark:text-slate-900 text-slate-400" />
                   </div>
               }
               {/* services */}
@@ -2115,6 +2191,56 @@ export default function Dashboard() {
                   <div className='text-slate-700 text-center font-bold mt-6'>Body</div>
                   <div className='mx-auto w-[80%] text-sm'>{createEmailData?.body?.length ? createEmailData.body : 'no body'}</div>
                 </div>
+              </div>
+          }
+          
+          {/* creating Email */}
+          {
+            showModal == 'Create_Emails' &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Send an Email</div>
+
+                <form onSubmit={createEmailFromDashboard}>
+
+                  <input name="recipient" id="recipient"
+                    type='email'
+                    placeholder='recipient@example.com'
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={createEmailData.recipient ?? ''}
+                    onChange={(event) => changeCreateEmailData('recipient', event.target.value)}
+                  />
+                  <div 
+                    className='text-sm text-blue-600 mb-4'
+                  >This is the subject of the email.</div>
+
+                  <input name="subject" id="subject"
+                    placeholder='subject'
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={createEmailData.subject ?? ''}
+                    onChange={(event) => changeCreateEmailData('subject', event.target.value)}
+                  />
+                  <div 
+                    className='text-sm text-blue-600 mb-4'
+                  >This is the subject of the email.</div>
+
+                  <textarea cols={3} name="body" id="body"
+                    placeholder='body'
+                    className='w-full p-2 rounded bg-slate-600 placeholder-slate-400 text-slate-100 focus:bg-slate-600 focus:ring-4 focus:ring-offset-indigo-700 focus:outline-none'
+                    value={createEmailData.body ?? ''}
+                    onChange={(event) => changeCreateEmailData('body', event.target.value)}
+                  />
+                  <div 
+                    className='text-sm text-blue-600 -mt-1 mb-4'
+                  >Give the body of your email</div>
+
+                  <div className='w-full flex justify-end'>
+                    <button
+                      type='submit'
+                      className='mt-10 rounded py-1 px-2 bg-slate-300 text-slate-700
+                        dark:bg-slate-700 dark:text-slate-300'
+                    >send</button>
+                  </div>
+                </form>
               </div>
           }
           
