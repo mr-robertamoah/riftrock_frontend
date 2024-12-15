@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUser } from '../composables/useGetUser';
 import { addUser } from '../redux/slices/auth';
-import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService, addEmails } from '../redux/slices/dashboard';
+import { addServices, addUsers, addUser as addDashboardUser, addService, updateUser, addContacts, deleteContact, updateContact, addDetails, updateDetail, deleteService, updateService, addEmails, updateEmail } from '../redux/slices/dashboard';
 import useDates from '../composables/useDates';
 import Modal from './Modal';
 import * as Icons from 'lucide-react';
@@ -701,6 +701,27 @@ export default function Dashboard() {
     .then((res) => {
       console.log(res);
       dispatch(deleteService(createServiceData))
+      setShowModal(null)
+    })
+    .catch((err) => {
+      console.log(err);
+      showFailureAlert(err.message ?? 'Something unfortunate happened. Try again shortly.')
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
+
+  async function markEmailFromDashboard(event) {
+    event.preventDefault()
+    if (!createEmailData?.id) return
+
+    setLoading(true)
+
+    axios.patch(`/emails/${createEmailData.id}`)
+    .then((res) => {
+      console.log(res);
+      dispatch(updateEmail(res.data))
       setShowModal(null)
     })
     .catch((err) => {
@@ -2073,6 +2094,32 @@ export default function Dashboard() {
                   <hr className='mt-3' />
                   <div className='text-slate-700 text-center font-bold mt-6'>Body</div>
                   <div className='mx-auto w-[80%] text-sm'>{createEmailData?.body?.length ? createEmailData.body : 'no body'}</div>
+                </div>
+              </div>
+          }
+          
+          {/* marking email */}
+          {
+            'Mark_Email' == showModal &&
+              <div className='py-2'>
+                <div className='my-4 text-center font-bold text-slate-600'>Marking Email</div>
+
+                <div >
+                  <div>You are about to mark the email as read?</div>
+                  <div className='w-full flex justify-center items-center gap-4'>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-blue-300 text-blue-700
+                        hover:bg-blue-700 hover:text-blue-300 transition duration-100'
+
+                      onClick={() => setShowModal(null)}
+                    >cancel</button>
+                    <button
+                      className='mt-10 rounded py-1 px-2 bg-green-300 text-green-700
+                        hover:bg-green-700 hover:text-green-300 transition duration-100'
+
+                      onClick={markEmailFromDashboard}
+                    >continue</button>
+                  </div>
                 </div>
               </div>
           }
